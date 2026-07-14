@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة قسم الشرطة | القوانين والبروتوكولات الرسمية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0e13;
+    --bg-1:#11161d;
+    --bg-2:#161d26;
+    --panel-border:#232d38;
+    --gold:#c9a227;
+    --gold-soft:#e8c76a;
+    --red:#b3312c;
+    --red-soft:#d84b3f;
+    --green:#3a9d6b;
+    --text-hi:#eef2f6;
+    --text-mid:#aab4c0;
+    --text-low:#6c7787;
+    --font-display:'Cairo', sans-serif;
+    --font-body:'IBM Plex Sans Arabic', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+    --radius:6px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-0);
+    color:var(--text-hi);
+    font-family:var(--font-body);
+    line-height:1.7;
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,39,0.08), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(179,49,44,0.06), transparent);
+  }
+  a{color:inherit; text-decoration:none;}
+  .container{max-width:1180px; margin:0 auto; padding:0 24px;}
+  ::selection{background:var(--gold); color:#0a0e13;}
+
+  /* ===== Header ===== */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,19,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 0;}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .badge-mark{width:42px; height:42px; flex:none;}
+  .brand-text .name{font-family:var(--font-display); font-weight:800; font-size:1.05rem; letter-spacing:.5px;}
+  .brand-text .tag{font-size:.72rem; color:var(--text-low); font-family:var(--font-mono); letter-spacing:1px;}
+  nav.mainnav{display:flex; gap:2px; flex-wrap:wrap;}
+  nav.mainnav a{
+    font-size:.85rem; color:var(--text-mid); padding:8px 12px; border-radius:4px;
+    transition:.15s; border:1px solid transparent;
+  }
+  nav.mainnav a:hover{color:var(--gold-soft); background:rgba(201,162,39,0.07); border-color:var(--panel-border);}
+  .login-btn{
+    font-family:var(--font-mono); font-size:.78rem; color:var(--bg-0);
+    background:var(--gold); padding:9px 18px; border-radius:4px; font-weight:600;
+    white-space:nowrap; transition:.15s;
+  }
+  .login-btn:hover{background:var(--gold-soft);}
+
+  /* ===== Dispatch ticker — signature element ===== */
+  .ticker-wrap{
+    background:#0d1319; border-bottom:1px solid var(--panel-border);
+    overflow:hidden; position:relative; height:34px; display:flex; align-items:center;
+  }
+  .ticker-live{
+    flex:none; display:flex; align-items:center; gap:7px; padding:0 16px; height:100%;
+    background:var(--bg-0); border-left:1px solid var(--panel-border); z-index:2;
+    font-family:var(--font-mono); font-size:.7rem; color:var(--red-soft); letter-spacing:1px;
+  }
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--red-soft); animation:blink 1.4s infinite;}
+  @keyframes blink{0%,100%{opacity:1} 50%{opacity:.25}}
+  .ticker-track{display:flex; white-space:nowrap; animation:scroll-left 38s linear infinite;}
+  .ticker-track span{font-family:var(--font-mono); font-size:.74rem; color:var(--text-mid); padding:0 26px; position:relative;}
+  .ticker-track span::after{content:'◆'; color:var(--gold); position:absolute; left:-2px; font-size:.55rem; top:6px;}
+  @keyframes scroll-left{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion: reduce){ .ticker-track{animation:none;} .dot{animation:none;} }
+
+  /* ===== Hero ===== */
+  .hero{
+    padding:88px 0 64px; text-align:center; position:relative;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .hero .eyebrow{
+    font-family:var(--font-mono); font-size:.75rem; color:var(--gold); letter-spacing:2px;
+    display:inline-flex; align-items:center; gap:8px; margin-bottom:22px;
+  }
+  .hero .eyebrow::before, .hero .eyebrow::after{content:''; width:28px; height:1px; background:var(--gold); opacity:.5;}
+  .hero h1{
+    font-family:var(--font-display); font-weight:900; font-size:clamp(2.1rem, 5vw, 3.6rem);
+    line-height:1.2; margin-bottom:18px;
+  }
+  .hero h1 .accent{color:var(--gold);}
+  .hero p{color:var(--text-mid); max-width:620px; margin:0 auto 34px; font-size:1.02rem;}
+  .hero-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  .btn-primary, .btn-ghost{
+    font-family:var(--font-body); font-weight:600; padding:13px 28px; border-radius:4px; font-size:.92rem;
+    transition:.18s; display:inline-block;
+  }
+  .btn-primary{background:var(--gold); color:var(--bg-0);}
+  .btn-primary:hover{background:var(--gold-soft); transform:translateY(-1px);}
+  .btn-ghost{border:1px solid var(--panel-border); color:var(--text-hi);}
+  .btn-ghost:hover{border-color:var(--gold); color:var(--gold-soft);}
+
+  .stat-strip{display:flex; justify-content:center; gap:0; margin-top:56px; flex-wrap:wrap;}
+  .stat{padding:0 34px; border-left:1px solid var(--panel-border); text-align:center;}
+  .stat:last-child{border-left:none;}
+  .stat .n{font-family:var(--font-mono); font-size:1.6rem; color:var(--gold-soft); font-weight:700;}
+  .stat .l{font-size:.76rem; color:var(--text-low); margin-top:2px;}
+
+  /* ===== Section shell ===== */
+  section.block{padding:74px 0; border-bottom:1px solid var(--panel-border);}
+  .block-head{margin-bottom:40px; max-width:680px;}
+  .block-head .kicker{font-family:var(--font-mono); font-size:.72rem; color:var(--gold); letter-spacing:2px; margin-bottom:10px; display:block;}
+  .block-head h2{font-family:var(--font-display); font-weight:800; font-size:1.9rem; margin-bottom:10px;}
+  .block-head p{color:var(--text-mid); font-size:.95rem;}
+
+  /* ===== Search ===== */
+  .search-box{
+    display:flex; align-items:center; gap:10px; background:var(--bg-1); border:1px solid var(--panel-border);
+    border-radius:5px; padding:12px 16px; max-width:460px; margin-bottom:8px;
+  }
+  .search-box input{
+    background:none; border:none; outline:none; color:var(--text-hi); width:100%; font-family:var(--font-body); font-size:.9rem;
+  }
+  .search-box input::placeholder{color:var(--text-low);}
+  .search-meta{font-family:var(--font-mono); font-size:.72rem; color:var(--text-low); margin-bottom:34px;}
+  .search-meta b{color:var(--gold-soft);}
+
+  /* ===== Rule cards ===== */
+  .rules-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:14px;}
+  .rule-card{
+    background:var(--bg-1); border:1px solid var(--panel-border); border-radius:var(--radius);
+    padding:20px 22px; position:relative; overflow:hidden; transition:.18s;
+  }
+  .rule-card:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .rule-card .num{
+    font-family:var(--font-mono); font-size:.7rem; color:var(--gold); background:rgba(201,162,39,0.1);
+    display:inline-block; padding:2px 8px; border-radius:3px; margin-bottom:12px;
+  }
+  .rule-card h3{font-family:var(--font-display); font-size:1rem; margin-bottom:8px; font-weight:700;}
+  .rule-card p{color:var(--text-mid); font-size:.86rem;}
+  .rule-card.hidden{display:none;}
+
+  /* ===== Ranks ===== */
+  .rank-path{display:flex; flex-direction:column; gap:0; position:relative;}
+  .rank-step{
+    display:grid; grid-template-columns:170px 1fr; gap:24px; padding:22px 0; border-top:1px solid var(--panel-border);
+    align-items:start;
+  }
+  .rank-step:first-child{border-top:none;}
+  .rank-title{font-family:var(--font-display); font-weight:800; font-size:1.02rem; color:var(--gold-soft); padding-top:2px;}
+  .rank-title small{display:block; font-family:var(--font-mono); font-size:.68rem; color:var(--text-low); margin-top:4px; font-weight:400;}
+  .rank-reqs{display:flex; flex-wrap:wrap; gap:8px;}
+  .req-chip{
+    background:var(--bg-1); border:1px solid var(--panel-border); border-radius:20px; padding:6px 14px;
+    font-size:.8rem; color:var(--text-mid);
+  }
+  .req-chip b{color:var(--text-hi); font-weight:600;}
+
+  /* ===== Tables ===== */
+  .table-tabs{display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap;}
+  .tab-btn{
+    font-family:var(--font-mono); font-size:.78rem; padding:8px 16px; border-radius:20px;
+    border:1px solid var(--panel-border); color:var(--text-mid); cursor:pointer; background:transparent; transition:.15s;
+  }
+  .tab-btn.active{background:var(--gold); color:var(--bg-0); border-color:var(--gold); font-weight:700;}
+  .table-wrap{overflow-x:auto; border:1px solid var(--panel-border); border-radius:var(--radius);}
+  table{width:100%; border-collapse:collapse; min-width:640px;}
+  thead th{
+    background:var(--bg-2); font-family:var(--font-mono); font-size:.72rem; color:var(--gold-soft);
+    text-align:right; padding:13px 16px; letter-spacing:.5px; border-bottom:1px solid var(--panel-border);
+  }
+  tbody td{padding:13px 16px; font-size:.85rem; border-bottom:1px solid var(--panel-border); color:var(--text-mid);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(201,162,39,0.04); color:var(--text-hi);}
+  td.fine{color:var(--gold-soft); font-family:var(--font-mono); font-weight:600;}
+  td.jail{color:var(--red-soft); font-family:var(--font-mono);}
+  .violation-table{display:none;}
+  .violation-table.active{display:block;}
+
+  /* ===== Codes ===== */
+  .code-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px;}
+  .code-card{
+    background:var(--bg-1); border:1px solid var(--panel-border); border-radius:var(--radius); padding:16px 18px;
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .code-num{
+    font-family:var(--font-mono); font-weight:700; color:var(--bg-0); background:var(--gold-soft);
+    border-radius:4px; padding:6px 10px; font-size:.85rem; flex:none; min-width:52px; text-align:center;
+  }
+  .code-num.red{background:var(--red-soft);}
+  .code-info .t{font-size:.86rem; color:var(--text-hi); font-weight:600; margin-bottom:2px;}
+  .code-info .d{font-size:.76rem; color:var(--text-low);}
+
+  /* ===== Two column info ===== */
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media(max-width:760px){.split{grid-template-columns:1fr;} .rank-step{grid-template-columns:1fr;}}
+  .info-panel{background:var(--bg-1); border:1px solid var(--panel-border); border-radius:var(--radius); padding:24px;}
+  .info-panel h4{font-family:var(--font-display); font-size:1rem; margin-bottom:14px; color:var(--gold-soft);}
+  .info-panel ul{list-style:none;}
+  .info-panel li{
+    font-size:.86rem; color:var(--text-mid); padding:9px 0 9px 0; border-top:1px dashed var(--panel-border);
+    display:flex; gap:10px;
+  }
+  .info-panel li:first-child{border-top:none;}
+  .info-panel li::before{content:'—'; color:var(--gold); flex:none;}
+
+  .alert-box{
+    background:linear-gradient(90deg, rgba(179,49,44,0.12), transparent);
+    border:1px solid rgba(179,49,44,0.35); border-radius:var(--radius); padding:16px 20px;
+    font-size:.85rem; color:var(--text-mid); margin:22px 0; display:flex; gap:12px; align-items:flex-start;
+  }
+  .alert-box .tag{color:var(--red-soft); font-weight:700; font-family:var(--font-mono); font-size:.72rem; flex:none;}
+
+  .miranda{
+    background:var(--bg-1); border:1px solid var(--panel-border); border-right:3px solid var(--gold);
+    border-radius:var(--radius); padding:26px 28px; font-size:.92rem; color:var(--text-mid); line-height:2;
+  }
+
+  footer{padding:44px 0; text-align:center;}
+  footer p{color:var(--text-low); font-size:.8rem; font-family:var(--font-mono);}
+
+  @media(max-width:820px){
+    nav.mainnav{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container topbar">
+    <div class="brand">
+      <svg class="badge-mark" viewBox="0 0 48 48" fill="none">
+        <path d="M24 3 L41 10 V23 C41 34 33 42 24 45 C15 42 7 34 7 23 V10 Z" fill="#161d26" stroke="#c9a227" stroke-width="1.5"/>
+        <path d="M24 10 L34 14.5 V23 C34 30 29.5 35 24 37.5 C18.5 35 14 30 14 23 V14.5 Z" fill="none" stroke="#e8c76a" stroke-width="1.2"/>
+        <text x="24" y="27" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#e8c76a" font-weight="700">PD</text>
+      </svg>
+      <div class="brand-text">
+        <div class="name">قسم شرطة الولاية</div>
+        <div class="tag">STATE POLICE PORTAL</div>
+      </div>
+    </div>
+    <nav class="mainnav">
+      <a href="#home">الرئيسية</a>
+      <a href="#rules">القوانين العامة</a>
+      <a href="#ranks">الرتب والترقيات</a>
+      <a href="#violations">المخالفات</a>
+      <a href="#radio">الراديو</a>
+      <a href="#pursuit">المطاردات</a>
+      <a href="#procedures">الإجراءات</a>
+    </nav>
+    <a href="#" class="login-btn">تسجيل الدخول</a>
+  </div>
+  <div class="ticker-wrap">
+    <div class="ticker-live"><span class="dot"></span> LIVE DISPATCH</div>
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <div class="container">
+    <span class="eyebrow">البوابة الرسمية للقوانين والبروتوكولات</span>
+    <h1>حماية المجتمع تبدأ <span class="accent">بالانضباط</span></h1>
+    <p>مرجعك الشامل لجميع لوائح القسم، الرتب، المخالفات، وبروتوكولات العمل الميداني والراديو — محدّثة باستمرار من قبل الإدارة.</p>
+    <div class="hero-actions">
+      <a href="#rules" class="btn-primary">تصفح القوانين العامة</a>
+      <a href="#violations" class="btn-ghost">جدول المخالفات</a>
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><div class="n">14</div><div class="l">قاعدة عامة</div></div>
+      <div class="stat"><div class="n">60+</div><div class="l">بند مخالفة</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">رتب وظيفية</div></div>
+      <div class="stat"><div class="n">24/7</div><div class="l">تغطية ميدانية</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="rules">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">GENERAL CONDUCT</span>
+      <h2>القوانين العامة</h2>
+      <p>المعايير التي تحكم سلوك كل منتسب أثناء الخدمة، من التعامل مع المواطنين إلى الانضباط الميداني.</p>
+    </div>
+    <div class="search-box">
+      <span style="color:var(--text-low)">⌕</span>
+      <input id="ruleSearch" type="text" placeholder="ابحث في القوانين العامة...">
+    </div>
+    <div class="search-meta">تم العثور على <b id="ruleCount">0</b> قاعدة</div>
+    <div class="rules-grid" id="rulesGrid"></div>
+  </div>
+</section>
+
+<section class="block" id="ranks">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">CHAIN OF COMMAND</span>
+      <h2>سلم الرتب والترقيات</h2>
+      <p>مسار التقدم الوظيفي وشروط كل ترقية داخل القسم.</p>
+    </div>
+    <div class="rank-path" id="rankPath"></div>
+  </div>
+</section>
+
+<section class="block" id="violations">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">PENAL CODE</span>
+      <h2>جدول المخالفات والعقوبات</h2>
+      <p>الغرامات ومدد السجن المعتمدة لكل نوع من المخالفات.</p>
+    </div>
+    <div class="table-tabs" id="tableTabs"></div>
+    <div id="tablesHost"></div>
+  </div>
+</section>
+
+<section class="block" id="radio">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">DISPATCH PROTOCOL</span>
+      <h2>أكواد وبروتوكولات الراديو</h2>
+      <p>الرموز الرقمية المعتمدة للتخاطب اللاسلكي وطلبات الإسناد الميداني.</p>
+    </div>
+    <div class="code-grid" id="codeGrid"></div>
+  </div>
+</section>
+
+<section class="block" id="pursuit">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">TACTICAL RESPONSE</span>
+      <h2>سياسة المطاردات</h2>
+      <p>الإجراءات التكتيكية المعتمدة أثناء ملاحقة المركبات والمشتبه بهم.</p>
+    </div>
+    <div class="alert-box">
+      <span class="tag">⚠ تنبيه</span>
+      <span>يُمنع تنفيذ الصدم التكتيكي دون إذن مسبق من الديسباتش ووجود وحدة مساندة على الأرض.</span>
+    </div>
+    <div class="split">
+      <div class="info-panel">
+        <h4>مراحل المطاردة</h4>
+        <ul>
+          <li>الوحدة الأساسية تبلّغ الديسباتش بموقعها ووصف المركبة وسبب الملاحقة فور بدء المطاردة.</li>
+          <li>يتم تنظيم الوحدات المساندة (ثانوية، ثالثة) بحسب ترتيب انضمامها للمطاردة.</li>
+          <li>الصدم التكتيكي يُنفَّذ فقط من وحدة مخوَّلة وبموافقة الديسباتش.</li>
+          <li>عند السيطرة على المركبة يُشرع فورًا بإجراءات القبض النظامية.</li>
+        </ul>
+      </div>
+      <div class="info-panel">
+        <h4>ضوابط الصدم التكتيكي</h4>
+        <ul>
+          <li>يُمنع الصدم داخل الجسور أو المناطق المكتظة بالمواطنين.</li>
+          <li>يجب توفر وحدة متابعة إضافية أثناء تنفيذ الصدم.</li>
+          <li>يُبلَّغ الديسباتش فورًا بنجاح أو فشل عملية الصدم.</li>
+          <li>عند إطلاق نار من داخل المركبة، يُسمح بالصدم كل 10 ثوانٍ.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="procedures" style="border-bottom:none;">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">ARREST PROCEDURE</span>
+      <h2>الإجراءات الجنائية والحقوق القانونية</h2>
+      <p>النص الرسمي الذي يجب تلاوته عند تنفيذ عملية القبض.</p>
+    </div>
+    <div class="miranda">
+      "أنت رهن الاعتقال من قبل قسم شرطة الولاية بتهمة (أعلى تهمة موجهة إليك). من حقك التزام الصمت، وأي شيء تقوله قد يُستخدم ضدك أمام المحكمة. من حقك أيضًا الاستعانة بمحامٍ، وإذا لم تكن قادرًا على توكيل أحد فسيتم تعيين محامٍ لك عند توفره."
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© قسم شرطة الولاية — بوابة القوانين الرسمية · هذا القالب جاهز للتخصيص باسم وشعار فريقك</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Data ---------- */
+const rules = [
+  {t:"احترام متبادل", d:"يُمنع التسلط على المواطنين أو من هم أقل رتبة. الاحترام حق متبادل بين جميع المنتسبين."},
+  {t:"الالتزام المروري", d:"الالتزام بقواعد المرور إلا في حالات البلاغات الطارئة الموثّقة."},
+  {t:"الجاهزية الميدانية", d:"التأكد من العتاد الكامل وتفعيل كاميرا الجسم قبل مباشرة أي مهمة ميدانية."},
+  {t:"الأدلة قبل الاعتقال", d:"يُشترط دليل مرئي أو مسموع أو شهادة حية قبل تنفيذ أي اعتقال."},
+  {t:"تفتيش المركبات", d:"يتطلب التفتيش رؤية واضحة لمادة ممنوعة أو موافقة صريحة من السائق أو إذنًا رسميًا."},
+  {t:"الجدية أثناء الخدمة", d:"التعامل باحترافية تامة وتجنّب السلوك غير اللائق بالزي الرسمي."},
+  {t:"انضباط الراديو", d:"عدم إشغال تردد الراديو دون ضرورة، واستخدام الرموز المعتمدة فقط."},
+  {t:"سياسة المعدات", d:"معدات الخدمة الرسمية للاستخدام المهني حصرًا، ومشاركتها مع المدنيين مخالفة جسيمة."},
+  {t:"التسلسل الإداري", d:"رفع الشكاوى والطلبات عبر المشرف المباشر دون تجاوز الرتب."},
+  {t:"توجيهات الديسباتش", d:"يُمنع رفض أوامر الديسباتش دون مبرر نظامي، بصرف النظر عن الرتبة."},
+  {t:"تقدير المواقف الحرجة", d:"في حال التهديد المباشر بالسلاح، تُعطى الأولوية للحفاظ على الأرواح."},
+  {t:"إجراءات الإخلاء العام", d:"عند صدور نداء الاستدعاء العام، تُوقَف جميع المهام غير الطارئة فورًا."},
+  {t:"إخبار المتهم", d:"يجب إبلاغ المتهم بالتهمة والغرامة قبل تنفيذ السجن أو التغريم."},
+  {t:"سرية القضايا", d:"يُمنع مناقشة تفاصيل القضايا الجارية خارج القنوات الرسمية للقسم."},
+];
+
+const ranks = [
+  {name:"Cadet", sub:"المرحلة التدريبية", reqs:["إتمام تقارير ميدانية موثّقة","مرافقة عضو أكاديمية","تقييم إيجابي إلزامي"]},
+  {name:"Officer I", sub:"أول رتبة ميدانية", reqs:["استلام ديسباتش لساعة كاملة","إثبات استيقاف مروري","إتمام 100 نقطة خدمة"]},
+  {name:"Officer II", sub:"ضابط ميداني", reqs:["إتمام 250 نقطة","شهادة التفاوض","15 ساعة تواجد ميداني"]},
+  {name:"Officer III", sub:"ضابط أول", reqs:["إتمام 450 نقطة","شهادة وحدة الدبابات","الانضمام لأحد الأقسام الداخلية"]},
+  {name:"Senior Officer", sub:"ضابط أقدم", reqs:["إتمام 800 نقطة","شهادة الطيران","25 ساعة تواجد ميداني"]},
+  {name:"Senior Lead Officer", sub:"قائد ميداني", reqs:["إتمام 1300 نقطة","الحصول على جميع الشهادات","27 يومًا في الرتبة"]},
+  {name:"Sergeant", sub:"رتبة إشرافية", reqs:["إتمام 1750 نقطة","مسؤولية أحد الأقسام","موافقة الإدارة"]},
+  {name:"First Sergeant", sub:"إشراف أقدم", reqs:["إتمام 2800 نقطة","150 ساعة خدمة إجمالية","موافقة الإدارة"]},
+  {name:"Staff Sergeant", sub:"القيادة العليا", reqs:["تُحدَّد شروطها من رئاسة القسم"]},
+];
+
+const violationTabs = {
+  traffic: {label:"مرورية", rows:[
+    ["قطع الإشارة الحمراء","150$","—"],
+    ["تجاوز السرعة المحددة","200$","—"],
+    ["وقوف في مكان مخالف","100$","—"],
+    ["القيادة العكسية","200$","—"],
+    ["القيادة المتهورة","500$","حجز المركبة"],
+    ["القيادة دون رخصة","1000$","حجز المركبة"],
+    ["القيادة تحت تأثير الكحول","500$","—"],
+    ["سباق غير مرخّص","1500$","حجز المركبة"],
+  ]},
+  general: {label:"عامة", rows:[
+    ["التسول","100$","5 أشهر"],
+    ["إزعاج المواطنين","300$","10 أشهر"],
+    ["إزعاج رجال الأمن","3000$","15 شهرًا"],
+    ["عدم الانصياع لأوامر الشرطة","500$","20 شهرًا"],
+    ["بلاغ كاذب","500$","10 أشهر"],
+    ["التدخل بعمل الشرطة","2500$","15 شهرًا"],
+    ["الرشوة","1000$","25 شهرًا"],
+    ["شهادة الزور","1000$","15 شهرًا"],
+  ]},
+  weapons: {label:"أسلحة", rows:[
+    ["حيازة سلاح غير مرخّص","800$","10 أشهر"],
+    ["إشهار السلاح دون استخدام","500$","20 شهرًا"],
+    ["تجارة أسلحة - درجة أولى","1500$","25 شهرًا"],
+    ["تجارة أسلحة - درجة ثانية","2000$","25 شهرًا"],
+    ["تجارة أسلحة - درجة ثالثة","3000$","25 شهرًا"],
+  ]},
+  felonies: {label:"جنائية كبرى", rows:[
+    ["الهروب من الشرطة","500$","20 شهرًا"],
+    ["الاختطاف","1000$","25 شهرًا"],
+    ["اختطاف رجل أمن","3500$","30 شهرًا"],
+    ["سرقة مركبة","200$","10 أشهر"],
+    ["سرقة متجر","300$","30 شهرًا"],
+    ["سرقة بنك","4000$","60 شهرًا"],
+    ["الدخول لمنشأة عسكرية","3000$","40 شهرًا"],
+  ]},
+};
+
+const radioCodes = [
+  {c:"Code 1", d:"تحرك بدون نور وصوت"},
+  {c:"Code 2", d:"تحرك مع نور بدون صوت"},
+  {c:"Code 3", d:"تحرك مع نور وصوت", red:true},
+  {c:"Code 4", d:"الموقع آمن وخالٍ"},
+  {c:"Code 6", d:"جارٍ التحقق من الموقع"},
+  {c:"Code 7", d:"استراحة أو خروج مؤقت"},
+  {c:"10-1", d:"مطاردة مركبة", red:true},
+  {c:"10-3", d:"استيقاف مروري"},
+  {c:"10-4", d:"مفهوم / تم الاستلام"},
+  {c:"10-5", d:"سرقة سيارة", red:true},
+  {c:"10-19", d:"مطاردة على الأقدام", red:true},
+  {c:"10-20", d:"الموقع الحالي"},
+  {c:"10-23", d:"طلب دعم فوري", red:true},
+  {c:"0-7", d:"تسجيل خروج"},
+  {c:"0-8", d:"تسجيل دخول"},
+];
+
+/* ---------- Render ---------- */
+function renderRules(list){
+  const grid = document.getElementById('rulesGrid');
+  grid.innerHTML = list.map((r,i)=>`
+    <div class="rule-card">
+      <span class="num">MDT-${String(i+1).padStart(2,'0')}</span>
+      <h3>${r.t}</h3>
+      <p>${r.d}</p>
+    </div>`).join('');
+  document.getElementById('ruleCount').textContent = list.length;
+}
+renderRules(rules);
+
+document.getElementById('ruleSearch').addEventListener('input', e=>{
+  const q = e.target.value.trim();
+  const filtered = rules.filter(r => r.t.includes(q) || r.d.includes(q));
+  renderRules(filtered);
+});
+
+document.getElementById('rankPath').innerHTML = ranks.map(r=>`
+  <div class="rank-step">
+    <div class="rank-title">${r.name}<small>${r.sub}</small></div>
+    <div class="rank-reqs">${r.reqs.map(x=>`<span class="req-chip">${x}</span>`).join('')}</div>
+  </div>`).join('');
+
+const tabKeys = Object.keys(violationTabs);
+document.getElementById('tableTabs').innerHTML = tabKeys.map((k,i)=>
+  `<button class="tab-btn ${i===0?'active':''}" data-k="${k}">${violationTabs[k].label}</button>`
+).join('');
+
+document.getElementById('tablesHost').innerHTML = tabKeys.map((k,i)=>`
+  <div class="table-wrap violation-table ${i===0?'active':''}" data-k="${k}">
+    <table>
+      <thead><tr><th>المخالفة</th><th>الغرامة</th><th>مدة السجن</th></tr></thead>
+      <tbody>
+        ${violationTabs[k].rows.map(row=>`
+          <tr><td>${row[0]}</td><td class="fine">${row[1]}</td><td class="jail">${row[2]}</td></tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>`).join('');
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const k = btn.dataset.k;
+    document.querySelectorAll('.violation-table').forEach(t=>{
+      t.classList.toggle('active', t.dataset.k === k);
+    });
+  });
+});
+
+document.getElementById('codeGrid').innerHTML = radioCodes.map(c=>`
+  <div class="code-card">
+    <div class="code-num ${c.red?'red':''}">${c.c}</div>
+    <div class="code-info">
+      <div class="t">${c.d}</div>
+    </div>
+  </div>`).join('');
+
+document.getElementById('tickerTrack').innerHTML =
+  (radioCodes.concat(radioCodes)).map(c=>`<span>${c.c} — ${c.d}</span>`).join('');
+</script>
+</body>
+</html>
