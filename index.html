@@ -277,6 +277,8 @@
       <div class="id-row"><span class="k">DURATION</span><span class="v">6 أسابيع</span></div>
       <div class="id-row"><span class="k">STATUS</span><span class="v">قيد التقييم</span></div>
       <span class="status-pill"><span class="dot"></span> التسجيل متاح للدفعة القادمة</span>
+    </div>
+  </div>
 </section>
 
 <section class="block" id="hierarchy">
@@ -490,7 +492,7 @@
   </div>
 </section>
 
-<section class="block" id="staff" style="border-bottom:none;">
+<section class="block" id="staff">
   <div class="container">
     <div class="block-head">
       <span class="kicker">TRAINING STAFF</span>
@@ -654,7 +656,7 @@ document.getElementById('staffGrid').innerHTML = staff.map(s=>`
    2) إعدادات الروم (Edit Channel) → Integrations → Webhooks → New Webhook
    3) انسخ الرابط (Copy Webhook URL) وحطه مكان الرابط بالأسفل
 */
-const WEBHOOK_URL = "ضع_رابط_الويب_هوك_هنا";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1526728729500582058/ROOnjbm4GFCzaC41FSGncEtGkd1n3A-skNO7zIOm8PqXWndfdNg4licrJSUtcF8yUGTI";
 
 document.getElementById('applyForm').addEventListener('submit', async function(e){
   e.preventDefault();
