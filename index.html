@@ -201,6 +201,8 @@
   }
   .field input:focus, .field textarea:focus, .field select:focus{border-color:var(--olive);}
   .field textarea{resize:vertical; min-height:90px;}
+  .field-hint{font-size:.72rem; color:var(--text-low); margin-top:8px; line-height:1.6;}
+  .field-hint b{color:var(--olive-soft); font-weight:600;}
   .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
   .submit-btn{
@@ -519,8 +521,13 @@
               <input type="text" id="f-name" required placeholder="مثال: عبدالله الحربي">
             </div>
             <div class="field">
-              <label>اسم الديسكورد</label>
-              <input type="text" id="f-discord" required placeholder="username#0000">
+              <label>آيدي الديسكورد (Discord ID)</label>
+              <input type="text" id="f-discord" required pattern="\d{15,22}" title="آيدي الديسكورد يتكون من أرقام فقط" placeholder="703365110655221851">
+              <p class="field-hint">
+                كيف تجيب آيديك؟ من إعدادات ديسكورد فعّل <b>وضع المطوّر</b>
+                (Settings → Advanced → Developer Mode)، بعدها اضغط بالزر الأيمن على اسمك واختر
+                <b>Copy User ID</b>، وألصقه هنا.
+              </p>
             </div>
           </div>
           <div class="field-row">
@@ -671,29 +678,44 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
   }
 
   const name = document.getElementById('f-name').value.trim();
-  const discord = document.getElementById('f-discord').value.trim();
+  const discordId = document.getElementById('f-discord').value.trim();
   const age = document.getElementById('f-age').value.trim();
   const hours = document.getElementById('f-hours').value.trim();
   const why = document.getElementById('f-why').value.trim();
   const exp = document.getElementById('f-exp').value.trim() || 'لا يوجد';
 
+  if(!/^\d{15,22}$/.test(discordId)){
+    status.textContent = 'آيدي الديسكورد غير صحيح — تأكد إنه أرقام فقط (انسخه بوضع المطوّر).';
+    status.classList.add('err');
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'جارٍ الإرسال...';
 
+  const now = new Date();
+  const appliedAt = now.toLocaleString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+
   const payload = {
+    content: `<@${discordId}>`,
     embeds: [{
-      title: "📋 طلب تقديم جديد — أكاديمية الشرطة",
+      title: "🛡️ طلب انضمام جديد / New Cadet Application",
       color: 14183466,
       fields: [
-        { name: "الاسم", value: name, inline: true },
-        { name: "الديسكورد", value: discord, inline: true },
-        { name: "العمر", value: age, inline: true },
-        { name: "ساعات التواجد", value: hours, inline: true },
-        { name: "سبب الانضمام", value: why },
-        { name: "الخبرة السابقة", value: exp }
+        { name: "👤 Discord", value: `<@${discordId}>`, inline: true },
+        { name: "🆔 Discord ID", value: discordId, inline: true },
+        { name: "📅 Applied At", value: appliedAt, inline: false },
+        { name: "👤 الاسم الكامل", value: name, inline: true },
+        { name: "🎂 العمر", value: age, inline: true },
+        { name: "⏰ ساعات التواجد", value: hours, inline: true },
+        { name: "💼 الخبرة السابقة", value: exp },
+        { name: "💬 سبب الانضمام", value: why },
+        { name: "📊 Status", value: "⏳ Pending Review" }
       ],
-      timestamp: new Date().toISOString()
-    }]
+      footer: { text: "Academy Application System" },
+      timestamp: now.toISOString()
+    }],
+    allowed_mentions: { parse: [] }
   };
 
   try{
