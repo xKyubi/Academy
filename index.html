@@ -1,744 +1,196 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أكاديمية الشرطة | بوابة التدريب الرسمية</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg-0:#10130e;
-    --bg-1:#171c13;
-    --bg-2:#1e2418;
-    --line:#2a3222;
-    --olive:#93a565;
-    --olive-soft:#b7c78e;
-    --blaze:#d97a2a;
-    --blaze-soft:#f0975a;
-    --steel:#6f8598;
-    --text-hi:#eef0e6;
-    --text-mid:#a7ae9a;
-    --text-low:#69705f;
-    --font-display:'Tajawal', sans-serif;
-    --font-body:'IBM Plex Sans Arabic', sans-serif;
-    --font-mono:'JetBrains Mono', monospace;
-    --radius:4px;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--bg-0); color:var(--text-hi); font-family:var(--font-body); line-height:1.75;
-    background-image:
-      repeating-linear-gradient(135deg, rgba(147,165,101,0.025) 0 2px, transparent 2px 26px),
-      radial-gradient(ellipse 800px 500px at 100% -10%, rgba(217,122,42,0.07), transparent);
-  }
-  a{color:inherit; text-decoration:none;}
-  .container{max-width:1180px; margin:0 auto; padding:0 24px;}
-  ::selection{background:var(--blaze); color:#10130e;}
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const {
+  Client,
+  GatewayIntentBits,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  PermissionsBitField,
+} = require('discord.js');
 
-  /* ===== Header ===== */
-  header{position:sticky; top:0; z-index:50; background:rgba(16,19,14,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
-  .topbar{display:flex; align-items:center; justify-content:space-between; padding:15px 0;}
-  .brand{display:flex; align-items:center; gap:12px;}
-  .brand-mark{width:40px; height:40px; flex:none;}
-  .brand-text .name{font-family:var(--font-display); font-weight:800; font-size:1.05rem; letter-spacing:.3px;}
-  .brand-text .tag{font-size:.68rem; color:var(--olive-soft); font-family:var(--font-mono); letter-spacing:2px;}
-  nav.mainnav{display:flex; gap:2px; flex-wrap:wrap;}
-  nav.mainnav a{font-size:.84rem; color:var(--text-mid); padding:8px 12px; border-radius:3px; transition:.15s;}
-  nav.mainnav a:hover{color:var(--olive-soft); background:rgba(147,165,101,0.08);}
-  .cta-btn{font-family:var(--font-mono); font-size:.76rem; font-weight:700; color:var(--bg-0); background:var(--blaze); padding:10px 18px; border-radius:3px; white-space:nowrap; transition:.15s;}
-  .cta-btn:hover{background:var(--blaze-soft);}
-  @media(max-width:840px){ nav.mainnav{display:none;} }
+/* ============ تخزين الطلبات (ملف JSON بسيط) ============ */
+const DATA_FILE = path.join(__dirname, 'applications.json');
 
-  /* ===== Hero ===== */
-  .hero{padding:80px 0 40px; border-bottom:1px solid var(--line); position:relative;}
-  .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:50px; align-items:center;}
-  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
-  .hero .eyebrow{font-family:var(--font-mono); font-size:.72rem; color:var(--blaze-soft); letter-spacing:2px; display:flex; align-items:center; gap:8px; margin-bottom:20px;}
-  .hero .eyebrow::before{content:''; width:22px; height:2px; background:var(--blaze);}
-  .hero h1{font-family:var(--font-display); font-weight:900; font-size:clamp(2rem,4.4vw,3.2rem); line-height:1.25; margin-bottom:18px;}
-  .hero h1 span{color:var(--olive-soft);}
-  .hero p{color:var(--text-mid); font-size:1rem; max-width:520px; margin-bottom:30px;}
-  .hero-actions{display:flex; gap:12px; flex-wrap:wrap;}
-  .btn-primary,.btn-ghost{font-weight:700; padding:13px 26px; border-radius:3px; font-size:.9rem; transition:.18s;}
-  .btn-primary{background:var(--blaze); color:var(--bg-0);}
-  .btn-primary:hover{background:var(--blaze-soft); transform:translateY(-1px);}
-  .btn-ghost{border:1px solid var(--line); color:var(--text-hi);}
-  .btn-ghost:hover{border-color:var(--olive); color:var(--olive-soft);}
+function loadApps() {
+  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '{}');
+  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+}
+function saveApps(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 
-  /* Cadet ID card - signature visual */
-  .id-card{
-    background:var(--bg-1); border:1px solid var(--line); border-radius:8px; padding:26px;
-    position:relative; overflow:hidden;
-  }
-  .id-card::before{content:'ACADEMY'; position:absolute; top:14px; left:-38px; background:var(--olive); color:var(--bg-0);
-    font-family:var(--font-mono); font-size:.62rem; font-weight:700; padding:4px 44px; transform:rotate(-45deg); letter-spacing:2px;}
-  .id-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; padding-bottom:16px; border-bottom:1px dashed var(--line);}
-  .id-top .label{font-family:var(--font-mono); font-size:.64rem; color:var(--text-low); letter-spacing:1px;}
-  .id-top .val{font-family:var(--font-display); font-weight:800; font-size:1.1rem; margin-top:4px;}
-  .seal{width:56px; height:56px; flex:none;}
-  .id-row{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); font-size:.83rem;}
-  .id-row:last-of-type{border-bottom:none;}
-  .id-row .k{color:var(--text-low); font-family:var(--font-mono); font-size:.72rem;}
-  .id-row .v{color:var(--text-hi); font-weight:600;}
-  .status-pill{display:inline-flex; align-items:center; gap:6px; margin-top:16px; background:rgba(147,165,101,0.12); color:var(--olive-soft);
-    font-family:var(--font-mono); font-size:.7rem; padding:6px 12px; border-radius:20px; border:1px solid rgba(147,165,101,0.3);}
-  .status-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--olive-soft);}
-
-  /* ===== Section shell ===== */
-  section.block{padding:70px 0; border-bottom:1px solid var(--line);}
-  .block-head{margin-bottom:38px; max-width:660px;}
-  .block-head .kicker{font-family:var(--font-mono); font-size:.7rem; color:var(--blaze-soft); letter-spacing:2px; margin-bottom:10px; display:block;}
-  .block-head h2{font-family:var(--font-display); font-weight:800; font-size:1.8rem; margin-bottom:10px;}
-  .block-head p{color:var(--text-mid); font-size:.94rem;}
-
-  /* ===== Admission requirements ===== */
-  .req-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;}
-  .req-card{background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:20px; transition:.18s;}
-  .req-card:hover{border-color:var(--olive);}
-  .req-card .ic{width:34px; height:34px; margin-bottom:14px; color:var(--olive-soft);}
-  .req-card h3{font-family:var(--font-display); font-weight:700; font-size:.98rem; margin-bottom:6px;}
-  .req-card p{color:var(--text-mid); font-size:.84rem;}
-
-  /* ===== Curriculum ===== */
-  .curric-list{display:flex; flex-direction:column;}
-  .curric-item{display:grid; grid-template-columns:64px 1fr; gap:20px; padding:22px 0; border-top:1px solid var(--line);}
-  .curric-item:first-child{border-top:none;}
-  .curric-wk{font-family:var(--font-mono); font-size:1rem; color:var(--blaze-soft); font-weight:700; text-align:center; background:var(--bg-1); border:1px solid var(--line); border-radius:4px; padding:8px 0; height:fit-content;}
-  .curric-body h4{font-family:var(--font-display); font-size:1rem; font-weight:700; margin-bottom:6px;}
-  .curric-body p{color:var(--text-mid); font-size:.86rem;}
-  .curric-tags{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
-  .curric-tags span{font-family:var(--font-mono); font-size:.68rem; color:var(--olive-soft); background:rgba(147,165,101,0.1); padding:4px 10px; border-radius:20px; border:1px solid rgba(147,165,101,0.25);}
-
-  /* ===== Weekly schedule ===== */
-  .schedule{display:grid; grid-template-columns:110px repeat(6,1fr); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
-  .schedule > div{padding:12px 10px; font-size:.78rem; border-bottom:1px solid var(--line); border-left:1px solid var(--line);}
-  .schedule > div:nth-child(7n){border-left:none;}
-  .schedule .head{background:var(--bg-2); font-family:var(--font-mono); color:var(--olive-soft); text-align:center; font-weight:700; font-size:.72rem;}
-  .schedule .time{background:var(--bg-1); font-family:var(--font-mono); color:var(--text-low); font-size:.7rem; display:flex; align-items:center;}
-  .schedule .slot{color:var(--text-mid); display:flex; align-items:center; justify-content:center; text-align:center;}
-  .schedule .slot.on{color:var(--text-hi); background:rgba(217,122,42,0.06);}
-  .schedule .empty{color:var(--text-low); opacity:.4; display:flex; align-items:center; justify-content:center;}
-  @media(max-width:760px){ .schedule{grid-template-columns:80px repeat(6,minmax(70px,1fr)); font-size:.7rem; overflow-x:auto;} }
-  .sched-wrap{overflow-x:auto;}
-
-  /* ===== Exams ===== */
-  .exam-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;}
-  .exam-card{background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:22px; position:relative;}
-  .exam-card .bar{height:5px; border-radius:3px; background:var(--bg-2); overflow:hidden; margin:14px 0 10px;}
-  .exam-card .bar i{display:block; height:100%; background:var(--olive);}
-  .exam-card .pass{font-family:var(--font-mono); font-size:.72rem; color:var(--olive-soft);}
-  .exam-card h3{font-family:var(--font-display); font-weight:700; font-size:.98rem; margin-bottom:4px;}
-  .exam-card p{color:var(--text-mid); font-size:.83rem;}
-
-  /* ===== Rank track — signature element ===== */
-  .track-wrap{position:relative; padding:20px 0 10px; overflow-x:auto;}
-  .track-line{display:flex; align-items:flex-start; gap:0; min-width:900px; position:relative;}
-  .track-line::before{content:''; position:absolute; top:19px; left:0; right:0; height:2px; background:repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px);}
-  .t-node{flex:1; text-align:center; position:relative; padding-top:0;}
-  .t-dot{width:38px; height:38px; border-radius:50%; background:var(--bg-1); border:2px solid var(--olive); display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:.7rem; font-weight:700; color:var(--olive-soft); margin:0 auto 12px; position:relative; z-index:2;}
-  .t-node:first-child .t-dot{background:var(--olive); color:var(--bg-0);}
-  .t-name{font-family:var(--font-display); font-weight:700; font-size:.82rem; margin-bottom:4px;}
-  .t-req{font-size:.7rem; color:var(--text-low); max-width:130px; margin:0 auto;}
-
-  /* ===== Instructors ===== */
-  .staff-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;}
-  .staff-card{background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:20px; text-align:center;}
-  .staff-avatar{width:56px; height:56px; border-radius:50%; background:var(--bg-2); border:1px solid var(--olive); margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; color:var(--olive-soft); font-size:1.1rem;}
-  .staff-card h4{font-family:var(--font-display); font-weight:700; font-size:.92rem;}
-  .staff-card .role{font-family:var(--font-mono); font-size:.68rem; color:var(--blaze-soft); margin-top:4px;}
-  .staff-card .spec{color:var(--text-mid); font-size:.78rem; margin-top:10px;}
-
-  .alert-box{background:linear-gradient(90deg, rgba(217,122,42,0.1), transparent); border:1px solid rgba(217,122,42,0.3); border-radius:var(--radius); padding:16px 20px; font-size:.85rem; color:var(--text-mid); margin-bottom:30px; display:flex; gap:12px;}
-  .alert-box .tag{color:var(--blaze-soft); font-weight:700; font-family:var(--font-mono); font-size:.72rem; flex:none;}
-
-  footer{padding:40px 0; text-align:center;}
-  footer p{color:var(--text-low); font-size:.78rem; font-family:var(--font-mono);}
-
-  /* ===== Command hierarchy ===== */
-  .cmd-tree{display:flex; flex-direction:column; align-items:center;}
-  .cmd-connector{width:2px; height:26px; background:var(--line);}
-  .cmd-node{background:var(--bg-1); border:1px solid var(--line); border-radius:6px; padding:16px 34px; text-align:center; min-width:220px;}
-  .cmd-node.top{border-color:var(--blaze); box-shadow:0 0 0 1px rgba(217,122,42,0.15);}
-  .cmd-node .role{font-family:var(--font-mono); font-size:.66rem; color:var(--blaze-soft); letter-spacing:1px; margin-bottom:6px;}
-  .cmd-node .who{font-family:var(--font-display); font-weight:800; font-size:1rem;}
-  .cmd-node .who.empty{color:var(--text-low); font-weight:500; font-family:var(--font-body); font-size:.82rem;}
-  .cmd-row{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
-
-  /* ===== Rule list (general rules / salute) ===== */
-  .rule-list{display:flex; flex-direction:column; gap:0; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
-  .rule-list .r-item{display:flex; gap:16px; padding:16px 20px; border-top:1px solid var(--line); background:var(--bg-1); align-items:flex-start;}
-  .rule-list .r-item:first-child{border-top:none;}
-  .rule-list .r-num{font-family:var(--font-mono); color:var(--blaze-soft); font-weight:700; font-size:.82rem; flex:none; padding-top:1px;}
-  .rule-list .r-text{color:var(--text-mid); font-size:.87rem;}
-
-  /* ===== Rank titles / honorifics ===== */
-  .honor-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px;}
-  .honor-card{background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:22px;}
-  .honor-card .h-title{font-family:var(--font-display); font-weight:800; font-size:1.15rem; color:var(--olive-soft); margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed var(--line);}
-  .honor-card ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
-  .honor-card li{font-size:.85rem; color:var(--text-mid); font-family:var(--font-mono);}
-
-  /* ===== Formation ===== */
-  .formation-card{background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:22px; margin-bottom:14px;}
-  .formation-card h4{font-family:var(--font-display); font-weight:700; font-size:.95rem; margin-bottom:12px;}
-  .order-chain{display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
-  .order-chain span{font-family:var(--font-mono); font-size:.76rem; background:var(--bg-2); border:1px solid var(--line); color:var(--text-hi); padding:6px 12px; border-radius:20px;}
-  .order-chain i{color:var(--blaze-soft); font-style:normal;}
-  .formation-card p{color:var(--text-mid); font-size:.83rem;}
-  .formation-card p b{color:var(--olive-soft);}
-
-  /* ===== Application form ===== */
-  .apply-wrap{display:grid; grid-template-columns:1fr; gap:0; max-width:640px;}
-  .form-panel{background:var(--bg-1); border:1px solid var(--line); border-radius:8px; padding:34px;}
-  .field{margin-bottom:18px;}
-  .field label{display:block; font-family:var(--font-mono); font-size:.72rem; color:var(--olive-soft); letter-spacing:.5px; margin-bottom:8px;}
-  .field input, .field textarea, .field select{
-    width:100%; background:var(--bg-0); border:1px solid var(--line); border-radius:4px; padding:12px 14px;
-    color:var(--text-hi); font-family:var(--font-body); font-size:.9rem; outline:none; transition:.15s;
-  }
-  .field input:focus, .field textarea:focus, .field select:focus{border-color:var(--olive);}
-  .field textarea{resize:vertical; min-height:90px;}
-  .field-hint{font-size:.72rem; color:var(--text-low); margin-top:8px; line-height:1.6;}
-  .field-hint b{color:var(--olive-soft); font-weight:600;}
-  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
-  .submit-btn{
-    width:100%; background:var(--blaze); color:var(--bg-0); font-weight:700; font-family:var(--font-body);
-    padding:14px; border:none; border-radius:4px; font-size:.94rem; cursor:pointer; transition:.15s; margin-top:6px;
-  }
-  .submit-btn:hover{background:var(--blaze-soft);}
-  .submit-btn:disabled{opacity:.6; cursor:not-allowed;}
-  .form-note{font-size:.76rem; color:var(--text-low); margin-top:14px; text-align:center;}
-  .form-status{margin-top:14px; font-size:.85rem; padding:10px 14px; border-radius:4px; display:none;}
-  .form-status.ok{display:block; background:rgba(147,165,101,0.12); color:var(--olive-soft); border:1px solid rgba(147,165,101,0.3);}
-  .form-status.err{display:block; background:rgba(217,122,42,0.1); color:var(--blaze-soft); border:1px solid rgba(217,122,42,0.3);}
-</style>
-</head>
-<body>
-
-<header>
-  <div class="container topbar">
-    <div class="brand">
-      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="18" fill="#171c13" stroke="#93a565" stroke-width="1.4"/>
-        <circle cx="20" cy="20" r="12" fill="none" stroke="#d97a2a" stroke-width="1.2"/>
-        <circle cx="20" cy="20" r="4" fill="#b7c78e"/>
-        <path d="M20 2 V8 M20 32 V38 M2 20 H8 M32 20 H38" stroke="#93a565" stroke-width="1.2"/>
-      </svg>
-      <div class="brand-text">
-        <div class="name">أكاديمية الشرطة</div>
-        <div class="tag">POLICE TRAINING ACADEMY</div>
-      </div>
-    </div>
-    <nav class="mainnav">
-      <a href="#home">الرئيسية</a>
-      <a href="#hierarchy">الهرم القيادي</a>
-      <a href="#rules">القوانين العامة</a>
-      <a href="#salute">التحية العسكرية</a>
-      <a href="#titles">مسميات الرتب</a>
-      <a href="#formation">الاصطفاف</a>
-      <a href="#admission">القبول</a>
-      <a href="#curriculum">المنهج</a>
-      <a href="#schedule">الجدول</a>
-      <a href="#exams">الاختبارات</a>
-      <a href="#staff">الكادر التدريبي</a>
-      <a href="#apply">التقديم</a>
-    </nav>
-    <a href="#apply" class="cta-btn">قدّم الآن</a>
-  </div>
-</header>
-
-<section class="hero" id="home">
-  <div class="container hero-grid">
-    <div>
-      <span class="eyebrow">TRAINING PORTAL — CLASS ENROLLMENT OPEN</span>
-      <h1>من متدرّب إلى <span>ضابط منضبط</span></h1>
-      <p>بوابة أكاديمية الشرطة الرسمية — منهج التدريب، شروط القبول، الجدول الأسبوعي، ومسار التقييم الكامل لكل مرحلة من رحلتك التدريبية.</p>
-      <div class="hero-actions">
-        <a href="#apply" class="btn-primary">قدّم الآن</a>
-        <a href="#curriculum" class="btn-ghost">استعرض المنهج التدريبي</a>
-      </div>
-    </div>
-    <div class="id-card">
-      <div class="id-top">
-        <div>
-          <div class="label">CADET IDENTIFICATION</div>
-          <div class="val">بطاقة المتدرّب</div>
-        </div>
-        <svg class="seal" viewBox="0 0 56 56" fill="none">
-          <circle cx="28" cy="28" r="26" stroke="#d97a2a" stroke-width="1.4"/>
-          <circle cx="28" cy="28" r="19" stroke="#93a565" stroke-width="1.2" stroke-dasharray="2 3"/>
-          <text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#b7c78e" font-weight="700">PD-A</text>
-        </svg>
-      </div>
-      <div class="id-row"><span class="k">RANK</span><span class="v">Cadet</span></div>
-      <div class="id-row"><span class="k">PROGRAM</span><span class="v">دفعة التدريب الأساسي</span></div>
-      <div class="id-row"><span class="k">DURATION</span><span class="v">6 أسابيع</span></div>
-      <div class="id-row"><span class="k">STATUS</span><span class="v">قيد التقييم</span></div>
-      <span class="status-pill"><span class="dot"></span> التسجيل متاح للدفعة القادمة</span>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="hierarchy">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">CHAIN OF COMMAND</span>
-      <h2>الهرم القيادي للأكاديمية</h2>
-      <p>التسلسل الإداري المسؤول عن إدارة الأكاديمية والإشراف على برنامج التدريب.</p>
-    </div>
-    <div class="cmd-tree">
-      <div class="cmd-node top">
-        <div class="role">POLICE ACADEMY COMMANDER</div>
-        <div class="who empty">بانتظار التعيين</div>
-      </div>
-      <div class="cmd-connector"></div>
-      <div class="cmd-node">
-        <div class="role">POLICE ACADEMY DEPUTY</div>
-        <div class="who empty">بانتظار التعيين</div>
-      </div>
-      <div class="cmd-connector"></div>
-      <div class="cmd-node">
-        <div class="role">POLICE ACADEMY SUPERVISOR</div>
-        <div class="who empty">بانتظار التعيين</div>
-      </div>
-      <div class="cmd-connector"></div>
-      <div class="cmd-node">
-        <div class="role">POLICE ACADEMY MANAGEMENT</div>
-        <div class="who empty">بانتظار التعيين</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="rules">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">CODE OF CONDUCT</span>
-      <h2>القوانين العامة</h2>
-      <p>القواعد الأساسية التي تحكم سلوك كل منتسب للأكاديمية أثناء الخدمة.</p>
-    </div>
-    <div class="rule-list">
-      <div class="r-item"><span class="r-num">01</span><span class="r-text">عدم التسلط على المواطنين والرتب الأقل منك، والاحترام يكون متبادلاً بين الجميع.</span></div>
-      <div class="r-item"><span class="r-num">02</span><span class="r-text">أخذ العسكرية بجدية تامة بالتصرفات والأقوال بعيدًا عن الكوميديا.</span></div>
-      <div class="r-item"><span class="r-num">03</span><span class="r-text">إبعاد المشاكل الشخصية وضبط النفس وعدم الشتم في الميدان.</span></div>
-      <div class="r-item"><span class="r-num">04</span><span class="r-text">يُمنع منعًا باتًا عصيان أوامر الرتب العليا، ويلزم احترامهم.</span></div>
-      <div class="r-item"><span class="r-num">05</span><span class="r-text">يُمنع منعًا باتًا المتاجرة أو إعطاء المعدات العسكرية للمواطنين (باند نهائي).</span></div>
-      <div class="r-item"><span class="r-num">06</span><span class="r-text">عدم رفع السلاح أو التيزر إلا في الحالات الجنائية ولسبب واضح.</span></div>
-      <div class="r-item"><span class="r-num">07</span><span class="r-text">الالتزام ببروتوكولات الراديو، وعدم استخدامه إلا للتبليغ عن الحالات.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="salute">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">MILITARY COURTESY</span>
-      <h2>بروتوكول التحية العسكرية</h2>
-      <p>ضوابط أداء التحية العسكرية بين المنتسبين داخل وخارج مركز الشرطة.</p>
-    </div>
-    <div class="rule-list">
-      <div class="r-item"><span class="r-num">01</span><span class="r-text">تكون إلزامية لرتبة Lieutenants فما فوق، وهي واجبة على العموم.</span></div>
-      <div class="r-item"><span class="r-num">02</span><span class="r-text">يجب على الرتبة المؤدَّى لها التحية أن تردّها، أو ترد بوضع الاستراحة.</span></div>
-      <div class="r-item"><span class="r-num">03</span><span class="r-text">تؤدّى التحية داخل وخارج مركز الشرطة، وتُستثنى أثناء الحالات الجنائية.</span></div>
-      <div class="r-item"><span class="r-num">04</span><span class="r-text">عند وجود مجموعة ومرور رتبة عالية، يتكفل أعلى رتبة بأداء التحية مع قول "العموم ثابت"، ومن ثم تُؤدّى التحية والبقية في وضع الثبات.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="titles">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">FORMS OF ADDRESS</span>
-      <h2>مسميات الرتب</h2>
-      <p>الألقاب الرسمية المعتمدة لمخاطبة كل مجموعة من الرتب.</p>
-    </div>
-    <div class="honor-grid">
-      <div class="honor-card">
-        <div class="h-title">معالي</div>
-        <ul>
-          <li>Police Commissioner</li>
-          <li>Police Commander</li>
-          <li>LSPD Chief</li>
-          <li>LSPD Chief Deputy</li>
-        </ul>
-      </div>
-      <div class="honor-card">
-        <div class="h-title">سعادة</div>
-        <ul>
-          <li>Lieutenants (I, II)</li>
-          <li>Captains</li>
-        </ul>
-      </div>
-      <div class="honor-card">
-        <div class="h-title">حضرة</div>
-        <ul>
-          <li>Sergeants</li>
-          <li>First Sergeants</li>
-          <li>Staff Sergeants</li>
-        </ul>
-      </div>
-      <div class="honor-card">
-        <div class="h-title">بمسمى الرتبة</div>
-        <ul>
-          <li>Cadets</li>
-          <li>Solo Cadets</li>
-          <li>Officer (I, II, III)</li>
-          <li>Senior Officers</li>
-          <li>Senior Lead Officers</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="formation">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">FORMATION</span>
-      <h2>الاصطفاف العسكري</h2>
-      <p>ترتيب الوقوف الرسمي حسب الفئة والرتبة أثناء الاصطفاف العام.</p>
-    </div>
-
-    <div class="formation-card">
-      <h4>اصطفاف الأفراد</h4>
-      <div class="order-chain">
-        <span>Cadets</span><i>←</i><span>Solo Cadets</span><i>←</i><span>Officer I/II/III</span><i>←</i><span>Senior Officers</span>
-      </div>
-      <p>الاصطفاف يكون من اليسار إلى اليمين. <b>من منظور المسؤول:</b> يكون الترتيب من اليمين إلى اليسار.</p>
-    </div>
-
-    <div class="formation-card">
-      <h4>اصطفاف الرقباء</h4>
-      <div class="order-chain">
-        <span>Sergeants</span><i>←</i><span>First Sergeants</span><i>←</i><span>Staff Sergeants</span>
-      </div>
-      <p>يصطف الرقباء على يسار أدنى رتبة من الأفراد. <b>من منظور المسؤول:</b> يكونون على اليمين.</p>
-    </div>
-
-    <div class="formation-card">
-      <h4>اصطفاف الضباط</h4>
-      <div class="order-chain">
-        <span>Lieutenants</span><i>←</i><span>Captains</span><i>←</i><span>Majors</span><i>←</i><span>Colonel</span>
-      </div>
-      <p>يصطف الضباط على يمين أعلى رتبة. <b>من منظور المسؤول:</b> يكونون على اليسار.</p>
-    </div>
-
-    <div class="alert-box">
-      <span class="tag">⚠ ضوابط عامة</span>
-      <span>يجب لبس الزي الرسمي وخلع الدرع والقبعة والنظارات وقت الاصطفاف. يُمنع التحدث إلا إذا كان الكلام موجّهًا لك مباشرة. يُمنع تسجيل الخروج فور الانتهاء من الاصطفاف.</span>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="admission">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">ADMISSION</span>
-      <h2>شروط القبول والتقديم</h2>
-      <p>المتطلبات الأساسية قبل الانضمام لبرنامج التدريب الأساسي بالأكاديمية.</p>
-    </div>
-    <div class="req-grid" id="reqGrid"></div>
-  </div>
-</section>
-
-<section class="block" id="curriculum">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">TRAINING PROGRAM</span>
-      <h2>المنهج التدريبي</h2>
-      <p>خطة الأسابيع الست لبرنامج التدريب الأساسي، من الأساسيات النظرية إلى التطبيق الميداني.</p>
-    </div>
-    <div class="curric-list" id="curricList"></div>
-  </div>
-</section>
-
-<section class="block" id="schedule">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">WEEKLY TIMETABLE</span>
-      <h2>الجدول الأسبوعي للتدريب</h2>
-      <p>مواعيد الحصص التدريبية الأسبوعية لدفعة الكادت الحالية.</p>
-    </div>
-    <div class="sched-wrap">
-      <div class="schedule" id="scheduleGrid"></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="exams">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">EVALUATION</span>
-      <h2>الاختبارات والتقييمات</h2>
-      <p>محطات التقييم الإلزامية لاجتياز برنامج التدريب والترقّي للميدان.</p>
-    </div>
-    <div class="alert-box"><span class="tag">⚠ ملاحظة</span><span>الرسوب في أي اختبار إلزامي يستوجب إعادة المحاولة بعد فترة تقييم إضافية بموافقة المدرّب المسؤول.</span></div>
-    <div class="exam-grid" id="examGrid"></div>
-  </div>
-</section>
-
-<section class="block" id="ranks">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">PROGRESSION PATH</span>
-      <h2>مسار الرتب من Cadet</h2>
-      <p>الخط الزمني للتقدّم من أول يوم تدريب إلى أول تكليف ميداني رسمي.</p>
-    </div>
-    <div class="track-wrap">
-      <div class="track-line" id="trackLine"></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="staff">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">TRAINING STAFF</span>
-      <h2>الكادر التدريبي</h2>
-      <p>المدرّبون المسؤولون عن الإشراف والتقييم خلال برنامج التدريب.</p>
-    </div>
-    <div class="staff-grid" id="staffGrid"></div>
-  </div>
-</section>
-
-<section class="block" id="apply" style="border-bottom:none;">
-  <div class="container">
-    <div class="block-head">
-      <span class="kicker">CADET APPLICATION</span>
-      <h2>نموذج التقديم</h2>
-      <p>عبّي بياناتك بالأسفل، وبيوصل طلبك مباشرة لفريق القبول عبر ديسكورد.</p>
-    </div>
-    <div class="apply-wrap">
-      <div class="form-panel">
-        <form id="applyForm">
-          <div class="field-row">
-            <div class="field">
-              <label>الاسم الكامل</label>
-              <input type="text" id="f-name" required placeholder="مثال: عبدالله الحربي">
-            </div>
-            <div class="field">
-              <label>آيدي الديسكورد (Discord ID)</label>
-              <input type="text" id="f-discord" required pattern="\d{15,22}" title="آيدي الديسكورد يتكون من أرقام فقط" placeholder="703365110655221851">
-              <p class="field-hint">
-                كيف تجيب آيديك؟ من إعدادات ديسكورد فعّل <b>وضع المطوّر</b>
-                (Settings → Advanced → Developer Mode)، بعدها اضغط بالزر الأيمن على اسمك واختر
-                <b>Copy User ID</b>، وألصقه هنا.
-              </p>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label>العمر</label>
-              <input type="number" id="f-age" required min="1" max="99" placeholder="18">
-            </div>
-            <div class="field">
-              <label>ساعات التواجد المتوقعة أسبوعيًا</label>
-              <input type="text" id="f-hours" required placeholder="مثال: 10 ساعات">
-            </div>
-          </div>
-          <div class="field">
-            <label>لماذا تريد الانضمام للأكاديمية؟</label>
-            <textarea id="f-why" required placeholder="اكتب سبب رغبتك بالانضمام..."></textarea>
-          </div>
-          <div class="field">
-            <label>هل لديك خبرة سابقة بأي قسم شرطة أو رول بلاي؟</label>
-            <textarea id="f-exp" placeholder="اختياري..."></textarea>
-          </div>
-          <button type="submit" class="submit-btn" id="submitBtn">إرسال الطلب</button>
-          <div class="form-status" id="formStatus"></div>
-          <p class="form-note">بإرسالك هذا النموذج فإنك تقرّ بالالتزام بجميع قوانين وشروط الأكاديمية.</p>
-        </form>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <p>© أكاديمية الشرطة — بوابة التدريب الرسمية · قالب جاهز للتخصيص باسم أكاديميتك</p>
-  </div>
-</footer>
-
-<script>
-const reqs = [
-  {t:"السن القانونية", d:"أن يكون المتقدّم ضمن الفئة العمرية المعتمدة من إدارة الأكاديمية."},
-  {t:"سجل نظيف", d:"عدم وجود مخالفات إدارية جسيمة سابقة داخل السيرفر."},
-  {t:"الالتزام بالحضور", d:"تعهّد بحضور جميع الحصص التدريبية الأسبوعية دون غياب غير مبرر."},
-  {t:"اجتياز المقابلة", d:"اجتياز مقابلة قبول قصيرة مع أحد أعضاء الأكاديمية."},
-  {t:"جهاز صوتي واضح", d:"امتلاك مايكروفون بجودة مقبولة للتواصل أثناء التدريب العملي."},
-  {t:"الانضباط الأساسي", d:"الإلمام بالقواعد العامة للسيرفر قبل بدء أول حصة تدريبية."},
-];
-
-const curriculum = [
-  {wk:"1", h:"الأساسيات النظرية", d:"مقدمة عن هيكل القسم، القوانين العامة، وآداب التعامل مع المواطنين.", tags:["نظري","تعريفي"]},
-  {wk:"2", h:"بروتوكولات الراديو", d:"تعلّم الأكواد المعتمدة، آداب التخاطب اللاسلكي، والتبليغ الصحيح للحالات.", tags:["راديو","تطبيقي"]},
-  {wk:"3", h:"الاستيقاف والتفتيش", d:"إجراءات الاستيقاف المروري، الأسئلة القانونية، وضوابط التفتيش المشروع.", tags:["ميداني"]},
-  {wk:"4", h:"التعامل مع الحالات الجنائية", d:"أساسيات القبض، قراءة الحقوق القانونية، والتعامل مع المشتبه بهم.", tags:["جنائي","تطبيقي"]},
-  {wk:"5", h:"المطاردات والدعم الميداني", d:"مبادئ المطاردة الآمنة، التنسيق بين الوحدات، وطلب الإسناد.", tags:["ميداني","فريق"]},
-  {wk:"6", h:"التقييم النهائي والتخرج", d:"اختبار شامل نظري وعملي أمام لجنة من الأكاديمية لتحديد الجاهزية الميدانية.", tags:["تقييم نهائي"]},
-];
-
-const days = ["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
-const scheduleRows = [
-  {time:"18:00", slots:[1,0,1,0,1,0]},
-  {time:"19:00", slots:[1,1,0,1,0,1]},
-  {time:"20:00", slots:[0,1,1,0,1,0]},
-  {time:"21:00", slots:[0,0,1,1,0,1]},
-];
-
-const exams = [
-  {t:"اختبار القوانين العامة", d:"اختبار نظري قصير حول القواعد العامة وأخلاقيات الخدمة.", pct:100, pass:"نسبة النجاح 80%"},
-  {t:"اختبار الأكواد والراديو", d:"تقييم عملي على استخدام أكواد الراديو أثناء موقف محاكاة.", pct:80, pass:"نسبة النجاح 75%"},
-  {t:"محاكاة استيقاف مروري", d:"تنفيذ استيقاف كامل أمام مدرّب مقيّم بدون أخطاء إجرائية.", pct:70, pass:"تقييم مباشر"},
-  {t:"الاختبار الميداني النهائي", d:"مرافقة دورية فعلية وتقييم الأداء العام قبل التخرج.", pct:60, pass:"موافقة لجنة التخرج"},
-];
-
-const track = [
-  {r:"Cadet", req:"أول يوم تدريب"},
-  {r:"Solo Cadet", req:"اجتياز الأسبوعين الأولين"},
-  {r:"Field Trainee", req:"اجتياز التقييم الميداني الأول"},
-  {r:"Graduate", req:"اجتياز الاختبار النهائي"},
-  {r:"Officer I", req:"أول تكليف رسمي بالقسم"},
-];
-
-const staff = [
-  {n:"Ahmed R.", role:"رئيس الأكاديمية", spec:"الإشراف العام على البرنامج التدريبي"},
-  {n:"Sara K.", role:"مدرّبة ميدانية", spec:"الاستيقافات والتعامل مع المخالفات"},
-  {n:"Omar F.", role:"مدرّب راديو وديسباتش", spec:"بروتوكولات التخاطب اللاسلكي"},
-  {n:"Lina M.", role:"مقيّمة اختبارات", spec:"إدارة التقييم النظري والعملي"},
-];
-
-document.getElementById('reqGrid').innerHTML = reqs.map(r=>`
-  <div class="req-card">
-    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    <h3>${r.t}</h3><p>${r.d}</p>
-  </div>`).join('');
-
-document.getElementById('curricList').innerHTML = curriculum.map(c=>`
-  <div class="curric-item">
-    <div class="curric-wk">W${c.wk}</div>
-    <div class="curric-body">
-      <h4>${c.h}</h4><p>${c.d}</p>
-      <div class="curric-tags">${c.tags.map(t=>`<span>${t}</span>`).join('')}</div>
-    </div>
-  </div>`).join('');
-
-let schedHTML = `<div class="head"></div>` + days.map(d=>`<div class="head">${d}</div>`).join('');
-scheduleRows.forEach(row=>{
-  schedHTML += `<div class="time">${row.time}</div>`;
-  row.slots.forEach(s=>{
-    schedHTML += s ? `<div class="slot on">تدريب</div>` : `<div class="empty">—</div>`;
-  });
+/* ============ بوت الديسكورد ============ */
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
-document.getElementById('scheduleGrid').innerHTML = schedHTML;
 
-document.getElementById('examGrid').innerHTML = exams.map(e=>`
-  <div class="exam-card">
-    <h3>${e.t}</h3><p>${e.d}</p>
-    <div class="bar"><i style="width:${e.pct}%"></i></div>
-    <div class="pass">${e.pass}</div>
-  </div>`).join('');
+client.once('ready', () => {
+  console.log(`✅ Bot logged in as ${client.user.tag}`);
+});
 
-document.getElementById('trackLine').innerHTML = track.map((t,i)=>`
-  <div class="t-node">
-    <div class="t-dot">${i+1}</div>
-    <div class="t-name">${t.r}</div>
-    <div class="t-req">${t.req}</div>
-  </div>`).join('');
+function buildEmbed(app, statusText, color) {
+  return new EmbedBuilder()
+    .setTitle('🛡️ طلب انضمام جديد / New Cadet Application')
+    .setColor(color)
+    .addFields(
+      { name: '👤 Discord', value: `<@${app.discordId}>`, inline: true },
+      { name: '🆔 Discord ID', value: app.discordId, inline: true },
+      { name: '📅 Applied At', value: app.appliedAt, inline: false },
+      { name: '👤 الاسم الكامل', value: app.name, inline: true },
+      { name: '🎂 العمر', value: String(app.age), inline: true },
+      { name: '⏰ ساعات التواجد', value: String(app.hours), inline: true },
+      { name: '📄 الأدلة الصحيحة والغير صحيحة', value: app.evidence || 'لم يُجب' },
+      { name: '🎖️ أهم ثلاث بروتوكولات عسكرية', value: app.protocols || 'لم يُجب' },
+      { name: '💬 سبب الانضمام', value: app.why },
+      { name: '💼 الخبرة السابقة', value: app.exp || 'لا يوجد' },
+      { name: '📊 Status', value: statusText },
+    )
+    .setFooter({ text: 'Academy Application System' })
+    .setTimestamp();
+}
 
-document.getElementById('staffGrid').innerHTML = staff.map(s=>`
-  <div class="staff-card">
-    <div class="staff-avatar">${s.n.split(' ')[0][0]}${(s.n.split(' ')[1]||'')[0]||''}</div>
-    <h4>${s.n}</h4>
-    <div class="role">${s.role}</div>
-    <div class="spec">${s.spec}</div>
-  </div>`).join('');
+function fullRow(discordId) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`accept_${discordId}`).setLabel('قبول').setStyle(ButtonStyle.Success).setEmoji('✅'),
+    new ButtonBuilder().setCustomId(`reject_${discordId}`).setLabel('رفض').setStyle(ButtonStyle.Danger).setEmoji('❌'),
+    new ButtonBuilder().setCustomId(`delete_${discordId}`).setLabel('حذف الطلب').setStyle(ButtonStyle.Secondary).setEmoji('🗑️'),
+  );
+}
+function deleteOnlyRow(discordId) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`delete_${discordId}`)
+      .setLabel('حذف الطلب (للسماح بالتقديم مجددًا)')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('🗑️'),
+  );
+}
 
-/* ===== Discord Webhook Submission =====
-   1) روح لروم الديسكورد اللي تبي الطلبات توصله
-   2) إعدادات الروم (Edit Channel) → Integrations → Webhooks → New Webhook
-   3) انسخ الرابط (Copy Webhook URL) وحطه مكان الرابط بالأسفل
-*/
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1526728729500582058/ROOnjbm4GFCzaC41FSGncEtGkd1n3A-skNO7zIOm8PqXWndfdNg4licrJSUtcF8yUGTI";
+/* ============ استقبال الطلبات من الموقع ============ */
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-document.getElementById('applyForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  const status = document.getElementById('formStatus');
-  status.className = 'form-status';
+app.post('/apply', async (req, res) => {
+  try {
+    const { name, discordId, age, hours, evidence, protocols, why, exp } = req.body;
 
-  if(WEBHOOK_URL.includes('ضع_رابط')){
-    status.textContent = 'لم يتم إعداد رابط ديسكورد بعد — تواصل مع مسؤول الموقع.';
-    status.classList.add('err');
-    return;
-  }
-
-  const name = document.getElementById('f-name').value.trim();
-  const discordId = document.getElementById('f-discord').value.trim();
-  const age = document.getElementById('f-age').value.trim();
-  const hours = document.getElementById('f-hours').value.trim();
-  const why = document.getElementById('f-why').value.trim();
-  const exp = document.getElementById('f-exp').value.trim() || 'لا يوجد';
-
-  if(!/^\d{15,22}$/.test(discordId)){
-    status.textContent = 'آيدي الديسكورد غير صحيح — تأكد إنه أرقام فقط (انسخه بوضع المطوّر).';
-    status.classList.add('err');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'جارٍ الإرسال...';
-
-  const now = new Date();
-  const appliedAt = now.toLocaleString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
-
-  const payload = {
-    content: `<@${discordId}>`,
-    embeds: [{
-      title: "🛡️ طلب انضمام جديد / New Cadet Application",
-      color: 14183466,
-      fields: [
-        { name: "👤 Discord", value: `<@${discordId}>`, inline: true },
-        { name: "🆔 Discord ID", value: discordId, inline: true },
-        { name: "📅 Applied At", value: appliedAt, inline: false },
-        { name: "👤 الاسم الكامل", value: name, inline: true },
-        { name: "🎂 العمر", value: age, inline: true },
-        { name: "⏰ ساعات التواجد", value: hours, inline: true },
-        { name: "💼 الخبرة السابقة", value: exp },
-        { name: "💬 سبب الانضمام", value: why },
-        { name: "📊 Status", value: "⏳ Pending Review" }
-      ],
-      footer: { text: "Academy Application System" },
-      timestamp: now.toISOString()
-    }],
-    allowed_mentions: { parse: [] }
-  };
-
-  try{
-    const res = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if(res.ok){
-      status.textContent = '✓ تم إرسال طلبك بنجاح، سيتم التواصل معك قريبًا.';
-      status.classList.add('ok');
-      document.getElementById('applyForm').reset();
-    } else {
-      throw new Error('Webhook error');
+    if (!name || !discordId || !age || !hours || !why) {
+      return res.status(400).json({ error: 'missing_fields' });
     }
-  } catch(err){
-    status.textContent = 'حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.';
-    status.classList.add('err');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'إرسال الطلب';
+    if (!/^\d{15,22}$/.test(discordId)) {
+      return res.status(400).json({ error: 'invalid_id' });
+    }
+
+    const apps = loadApps();
+    if (apps[discordId]) {
+      // موجود طلب سابق ولسا ما انحذف من قبل الإدارة
+      return res.status(409).json({ error: 'already_applied' });
+    }
+
+    const record = {
+      name,
+      discordId,
+      age,
+      hours,
+      evidence: evidence || '',
+      protocols: protocols || '',
+      why,
+      exp: exp || '',
+      status: 'pending',
+      appliedAt: new Date().toLocaleString('ar-SA', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      }),
+    };
+    apps[discordId] = record;
+    saveApps(apps);
+
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+    const embed = buildEmbed(record, '⏳ Pending Review', 0xd97a2a);
+    await channel.send({ embeds: [embed], components: [fullRow(discordId)] });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'server_error' });
   }
 });
-</script>
-</body>
-</html>
+
+app.get('/', (_req, res) => res.send('Academy Application Bot is running.'));
+
+/* ============ التعامل مع ضغطات الأزرار ============ */
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  const [action, discordId] = interaction.customId.split('_');
+  if (!['accept', 'reject', 'delete'].includes(action)) return;
+
+  const member = interaction.member;
+  const isAdmin =
+    member.permissions.has(PermissionsBitField.Flags.Administrator) ||
+    (process.env.ADMIN_ROLE_ID && member.roles.cache.has(process.env.ADMIN_ROLE_ID));
+
+  if (!isAdmin) {
+    return interaction.reply({ content: '⛔ ليس لديك صلاحية لتنفيذ هذا الإجراء.', ephemeral: true });
+  }
+
+  const apps = loadApps();
+  const record = apps[discordId];
+
+  if (action === 'delete') {
+    delete apps[discordId];
+    saveApps(apps);
+    if (record) {
+      const embed = buildEmbed(record, '🗑️ تم حذف الطلب — يمكنه التقديم مجددًا', 0x6f8598);
+      await interaction.update({ embeds: [embed], components: [] });
+    } else {
+      await interaction.update({ components: [] });
+    }
+    return;
+  }
+
+  if (!record) {
+    return interaction.reply({ content: 'هذا الطلب لم يعد موجودًا (ربما انحذف مسبقًا).', ephemeral: true });
+  }
+
+  if (action === 'accept') {
+    record.status = 'accepted';
+    apps[discordId] = record;
+    saveApps(apps);
+
+    try {
+      const user = await client.users.fetch(discordId);
+      await user.send(
+        `🎉 مبروك! تم قبول طلبك للانضمام لأكاديمية الشرطة.\n\n` +
+        `رابط سيرفر الديسكورد: ${process.env.GUILD_INVITE_LINK}\n\n` +
+        `بانتظارك للانضمام لأول حصة تدريبية.`,
+      );
+    } catch (e) {
+      console.log(`⚠️ تعذّر إرسال DM للمستخدم ${discordId} (الخاص مقفول عنده).`);
+    }
+
+    const embed = buildEmbed(record, '✅ Accepted', 0x93a565);
+    await interaction.update({ embeds: [embed], components: [deleteOnlyRow(discordId)] });
+    return;
+  }
+
+  if (action === 'reject') {
+    record.status = 'rejected';
+    apps[discordId] = record;
+    saveApps(apps);
+
+    const embed = buildEmbed(record, '❌ Rejected', 0xb3312c);
+    await interaction.update({ embeds: [embed], components: [deleteOnlyRow(discordId)] });
+    return;
+  }
+});
+
+client.login(process.env.BOT_TOKEN);
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`🚀 API listening on port ${process.env.PORT || 3000}`);
+});
