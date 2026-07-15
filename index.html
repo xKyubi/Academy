@@ -160,11 +160,11 @@
   <div class="container hero-grid">
     <div>
       <span class="eyebrow">TRAINING PORTAL — CLASS ENROLLMENT OPEN</span>
-      <h1>من متدرّب إلى <span>ضابط منضبط</span></h1>
-      <p>بوابة أكاديمية الشرطة الرسمية — تعرّف على الهرم القيادي وقدّم طلب انضمامك مباشرة.</p>
+      <h1>من متدرّب إلى <span>شرطي منضبط</span></h1>
+      <p>بوابة أكاديمية الشرطة الرسمية .</p>
       <div class="hero-actions">
         <a href="#apply" class="btn-primary">قدّم الآن</a>
-        <a href="#hierarchy" class="btn-ghost">الهرم القيادي</a>
+        <a href="#hierarchy" class="btn-ghost">هرم أكاديمية</a>
       </div>
     </div>
     <div class="id-card">
@@ -181,7 +181,7 @@
       </div>
       <div class="id-row"><span class="k">RANK</span><span class="v">Cadet</span></div>
       <div class="id-row"><span class="k">PROGRAM</span><span class="v">دفعة التدريب الأساسي</span></div>
-      <div class="id-row"><span class="k">DURATION</span><span class="v">6 أسابيع</span></div>
+      <div class="id-row"><span class="k">DURATION</span><span class="v">اسبوع</span></div>
       <div class="id-row"><span class="k">STATUS</span><span class="v">قيد التقييم</span></div>
       <span class="status-pill"><span class="dot"></span> التسجيل متاح للدفعة القادمة</span>
     </div>
@@ -192,20 +192,20 @@
   <div class="container">
     <div class="block-head">
       <span class="kicker">CHAIN OF COMMAND</span>
-      <h2>الهرم القيادي للأكاديمية</h2>
-      <p>التسلسل الإداري المسؤول عن إدارة الأكاديمية والإشراف على برنامج التدريب.</p>
+      <h2>هرم أكاديمية</h2>
+      <p>التسلسل المسؤول عن إدارة الأكاديمية والإشراف على برنامج التدريب.</p>
     </div>
 
     <div class="tree">
       <div class="tier-row">
         <div class="person-card top">
-          <div class="person-photo"><svg><use href="https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png"/></svg></div>
-          <div class="p-name empty">Kyubi</div>
+          <div class="person-photo"><img src="https://cdn.discordapp.com/avatars/1059270977562869780/3d07160ab5396daa82e907a1035a5bea.webp?size=1024" alt=""></div>
+          <div class="p-name empty">بانتظار التعيين</div>
           <div class="p-rank">POLICE ACADEMY COMMANDER</div>
         </div>
         <div class="person-card top">
           <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-          <div class="p-name empty">Kyubi</div>
+          <div class="p-name empty">بانتظار التعيين</div>
           <div class="p-rank">POLICE ACADEMY DEPUTY</div>
         </div>
       </div>
@@ -213,12 +213,12 @@
       <div class="tier-row">
         <div class="person-card">
           <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-          <div class="p-name empty">Kyubi</div>
+          <div class="p-name empty">بانتظار التعيين</div>
           <div class="p-rank">POLICE ACADEMY SUPERVISOR</div>
         </div>
         <div class="person-card">
           <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-          <div class="p-name empty">Kyubi</div>
+          <div class="p-name empty">بانتظار التعيين</div>
           <div class="p-rank">POLICE ACADEMY MANAGEMENT</div>
         </div>
       </div>
@@ -226,22 +226,22 @@
       <div class="branch-row">
           <div class="person-card small">
             <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-            <div class="p-name empty">Kyubi</div>
+            <div class="p-name empty">بانتظار التعيين</div>
             <div class="p-rank">SECTION LEADER</div>
           </div>
           <div class="person-card small">
             <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-            <div class="p-name empty">Kyubi</div>
+            <div class="p-name empty">بانتظار التعيين</div>
             <div class="p-rank">SECTION LEADER</div>
           </div>
           <div class="person-card small">
             <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-            <div class="p-name empty">Kyubi</div>
+            <div class="p-name empty">بانتظار التعيين</div>
             <div class="p-rank">SECTION LEADER</div>
           </div>
           <div class="person-card small">
             <div class="person-photo"><svg><use href="#silhouette"/></svg></div>
-            <div class="p-name empty">Kyubi</div>
+            <div class="p-name empty">بانتظار التعيين</div>
             <div class="p-rank">SECTION LEADER</div>
           </div>
         </div>
@@ -310,7 +310,7 @@
 
 <footer>
   <div class="container">
-    <p>© أكاديمية الشرطة — بوابة التدريب الرسمية · قالب جاهز للتخصيص باسم أكاديميتك</p>
+    <p>© أكاديمية الشرطة — بوابة التدريب الرسمية · </p>
   </div>
 </footer>
 
@@ -326,6 +326,13 @@ const STORAGE_KEY = "academy_application_submitted";
 const form = document.getElementById('applyForm');
 const btn = document.getElementById('submitBtn');
 const status = document.getElementById('formStatus');
+
+/* لإعادة التقديم: افتح الرابط مع ?reset=1 بآخره، مثال:
+   https://username.github.io/Police-Academy/?reset=1
+   وبيتم مسح "تم التقديم مسبقًا" من نفس الجهاز تلقائيًا */
+if(new URLSearchParams(window.location.search).get('reset') === '1'){
+  localStorage.removeItem(STORAGE_KEY);
+}
 
 /* لو سبق وقدّم من نفس المتصفح، نعطّل النموذج من البداية */
 function checkAlreadyApplied(){
