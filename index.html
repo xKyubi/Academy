@@ -1,196 +1,425 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const {
-  Client,
-  GatewayIntentBits,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  PermissionsBitField,
-} = require('discord.js');
-
-/* ============ تخزين الطلبات (ملف JSON بسيط) ============ */
-const DATA_FILE = path.join(__dirname, 'applications.json');
-
-function loadApps() {
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '{}');
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-}
-function saveApps(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-/* ============ بوت الديسكورد ============ */
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
-});
-
-client.once('ready', () => {
-  console.log(`✅ Bot logged in as ${client.user.tag}`);
-});
-
-function buildEmbed(app, statusText, color) {
-  return new EmbedBuilder()
-    .setTitle('🛡️ طلب انضمام جديد / New Cadet Application')
-    .setColor(color)
-    .addFields(
-      { name: '👤 Discord', value: `<@${app.discordId}>`, inline: true },
-      { name: '🆔 Discord ID', value: app.discordId, inline: true },
-      { name: '📅 Applied At', value: app.appliedAt, inline: false },
-      { name: '👤 الاسم الكامل', value: app.name, inline: true },
-      { name: '🎂 العمر', value: String(app.age), inline: true },
-      { name: '⏰ ساعات التواجد', value: String(app.hours), inline: true },
-      { name: '📄 الأدلة الصحيحة والغير صحيحة', value: app.evidence || 'لم يُجب' },
-      { name: '🎖️ أهم ثلاث بروتوكولات عسكرية', value: app.protocols || 'لم يُجب' },
-      { name: '💬 سبب الانضمام', value: app.why },
-      { name: '💼 الخبرة السابقة', value: app.exp || 'لا يوجد' },
-      { name: '📊 Status', value: statusText },
-    )
-    .setFooter({ text: 'Academy Application System' })
-    .setTimestamp();
-}
-
-function fullRow(discordId) {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`accept_${discordId}`).setLabel('قبول').setStyle(ButtonStyle.Success).setEmoji('✅'),
-    new ButtonBuilder().setCustomId(`reject_${discordId}`).setLabel('رفض').setStyle(ButtonStyle.Danger).setEmoji('❌'),
-    new ButtonBuilder().setCustomId(`delete_${discordId}`).setLabel('حذف الطلب').setStyle(ButtonStyle.Secondary).setEmoji('🗑️'),
-  );
-}
-function deleteOnlyRow(discordId) {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`delete_${discordId}`)
-      .setLabel('حذف الطلب (للسماح بالتقديم مجددًا)')
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji('🗑️'),
-  );
-}
-
-/* ============ استقبال الطلبات من الموقع ============ */
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.post('/apply', async (req, res) => {
-  try {
-    const { name, discordId, age, hours, evidence, protocols, why, exp } = req.body;
-
-    if (!name || !discordId || !age || !hours || !why) {
-      return res.status(400).json({ error: 'missing_fields' });
-    }
-    if (!/^\d{15,22}$/.test(discordId)) {
-      return res.status(400).json({ error: 'invalid_id' });
-    }
-
-    const apps = loadApps();
-    if (apps[discordId]) {
-      // موجود طلب سابق ولسا ما انحذف من قبل الإدارة
-      return res.status(409).json({ error: 'already_applied' });
-    }
-
-    const record = {
-      name,
-      discordId,
-      age,
-      hours,
-      evidence: evidence || '',
-      protocols: protocols || '',
-      why,
-      exp: exp || '',
-      status: 'pending',
-      appliedAt: new Date().toLocaleString('ar-SA', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
-      }),
-    };
-    apps[discordId] = record;
-    saveApps(apps);
-
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-    const embed = buildEmbed(record, '⏳ Pending Review', 0xd97a2a);
-    await channel.send({ embeds: [embed], components: [fullRow(discordId)] });
-
-    res.json({ ok: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'server_error' });
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أكاديمية الشرطة | التقديم والهرم القيادي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#10130e; --bg-1:#171c13; --bg-2:#1e2418; --line:#2a3222;
+    --olive:#93a565; --olive-soft:#b7c78e; --blaze:#d97a2a; --blaze-soft:#f0975a;
+    --text-hi:#eef0e6; --text-mid:#a7ae9a; --text-low:#69705f;
+    --font-display:'Tajawal', sans-serif; --font-body:'IBM Plex Sans Arabic', sans-serif; --font-mono:'JetBrains Mono', monospace;
   }
-});
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-0); color:var(--text-hi); font-family:var(--font-body); line-height:1.75;
+    background-image:
+      repeating-linear-gradient(135deg, rgba(147,165,101,0.025) 0 2px, transparent 2px 26px),
+      radial-gradient(ellipse 800px 500px at 100% -10%, rgba(217,122,42,0.07), transparent);
+  }
+  a{color:inherit; text-decoration:none;}
+  .container{max-width:1000px; margin:0 auto; padding:0 24px;}
+  ::selection{background:var(--blaze); color:#10130e;}
 
-app.get('/', (_req, res) => res.send('Academy Application Bot is running.'));
+  header{position:sticky; top:0; z-index:50; background:rgba(16,19,14,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:15px 0;}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{width:40px; height:40px; flex:none;}
+  .brand-text .name{font-family:var(--font-display); font-weight:800; font-size:1.05rem;}
+  .brand-text .tag{font-size:.68rem; color:var(--olive-soft); font-family:var(--font-mono); letter-spacing:2px;}
+  nav.mainnav{display:flex; gap:4px;}
+  nav.mainnav a{font-size:.86rem; color:var(--text-mid); padding:8px 14px; border-radius:3px; transition:.15s;}
+  nav.mainnav a:hover{color:var(--olive-soft); background:rgba(147,165,101,0.08);}
+  .cta-btn{font-family:var(--font-mono); font-size:.76rem; font-weight:700; color:var(--bg-0); background:var(--blaze); padding:10px 18px; border-radius:3px; white-space:nowrap; transition:.15s;}
+  .cta-btn:hover{background:var(--blaze-soft);}
+  @media(max-width:640px){ nav.mainnav{display:none;} }
 
-/* ============ التعامل مع ضغطات الأزرار ============ */
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isButton()) return;
+  .hero{padding:76px 0 60px; text-align:center; border-bottom:1px solid var(--line);}
+  .hero .eyebrow{font-family:var(--font-mono); font-size:.72rem; color:var(--blaze-soft); letter-spacing:2px; display:inline-flex; align-items:center; gap:8px; margin-bottom:20px;}
+  .hero .eyebrow::before, .hero .eyebrow::after{content:''; width:22px; height:2px; background:var(--blaze);}
+  .hero h1{font-family:var(--font-display); font-weight:900; font-size:clamp(2rem,4.6vw,3.2rem); line-height:1.25; margin-bottom:16px;}
+  .hero h1 span{color:var(--olive-soft);}
+  .hero p{color:var(--text-mid); font-size:1rem; max-width:560px; margin:0 auto 30px;}
+  .hero-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .btn-primary,.btn-ghost{font-weight:700; padding:13px 26px; border-radius:3px; font-size:.9rem; transition:.18s; display:inline-block;}
+  .btn-primary{background:var(--blaze); color:var(--bg-0);}
+  .btn-primary:hover{background:var(--blaze-soft); transform:translateY(-1px);}
+  .btn-ghost{border:1px solid var(--line); color:var(--text-hi);}
+  .btn-ghost:hover{border-color:var(--olive); color:var(--olive-soft);}
 
-  const [action, discordId] = interaction.customId.split('_');
-  if (!['accept', 'reject', 'delete'].includes(action)) return;
+  section.block{padding:70px 0; border-bottom:1px solid var(--line);}
+  .block-head{margin-bottom:40px; max-width:660px; margin-left:auto; margin-right:auto; text-align:center;}
+  .block-head .kicker{font-family:var(--font-mono); font-size:.7rem; color:var(--blaze-soft); letter-spacing:2px; margin-bottom:10px; display:block;}
+  .block-head h2{font-family:var(--font-display); font-weight:800; font-size:1.8rem; margin-bottom:10px;}
+  .block-head p{color:var(--text-mid); font-size:.94rem;}
 
-  const member = interaction.member;
-  const isAdmin =
-    member.permissions.has(PermissionsBitField.Flags.Administrator) ||
-    (process.env.ADMIN_ROLE_ID && member.roles.cache.has(process.env.ADMIN_ROLE_ID));
+  /* ===== Command tree ===== */
+  .tree{display:flex; flex-direction:column; align-items:center; gap:36px;}
+  .tier-row{display:flex; gap:32px; justify-content:center; flex-wrap:wrap;}
+  .person-card{text-align:center; position:relative;}
+  .person-photo{
+    width:170px; height:170px; border-radius:22px; margin:0 auto 14px; overflow:hidden;
+    background:linear-gradient(160deg, var(--bg-2), var(--bg-0)); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .person-photo img, .person-photo svg{width:100%; height:100%; object-fit:cover;}
+  .person-photo svg{padding:30px; color:var(--line);}
+  .person-card.top .person-photo{border-color:var(--blaze); box-shadow:0 0 0 1px rgba(217,122,42,0.15);}
+  .person-card.small .person-photo{width:140px; height:140px; border-radius:20px;}
+  .person-card.small .person-photo svg{padding:24px;}
+  .p-name{font-family:var(--font-display); font-weight:800; font-size:1rem; color:var(--text-hi); margin-bottom:4px;}
+  .p-name.empty{color:var(--text-low); font-weight:500; font-family:var(--font-body); font-size:.82rem;}
+  .p-rank{font-family:var(--font-mono); font-size:.66rem; color:var(--blaze-soft); letter-spacing:1px; text-transform:uppercase;}
 
-  if (!isAdmin) {
-    return interaction.reply({ content: '⛔ ليس لديك صلاحية لتنفيذ هذا الإجراء.', ephemeral: true });
+  .branch-row{display:flex; gap:32px; flex-wrap:wrap; justify-content:center;}
+
+  /* Cadet ID card */
+  .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:50px; align-items:center; text-align:right;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr; text-align:center;}}
+  .id-card{background:var(--bg-1); border:1px solid var(--line); border-radius:8px; padding:26px; position:relative; overflow:hidden; text-align:right;}
+  .id-card::before{content:'ACADEMY'; position:absolute; top:14px; left:-38px; background:var(--olive); color:var(--bg-0);
+    font-family:var(--font-mono); font-size:.62rem; font-weight:700; padding:4px 44px; transform:rotate(-45deg); letter-spacing:2px;}
+  .id-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; padding-bottom:16px; border-bottom:1px dashed var(--line);}
+  .id-top .label{font-family:var(--font-mono); font-size:.64rem; color:var(--text-low); letter-spacing:1px;}
+  .id-top .val{font-family:var(--font-display); font-weight:800; font-size:1.1rem; margin-top:4px;}
+  .id-seal{width:56px; height:56px; flex:none;}
+  .id-row{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); font-size:.83rem;}
+  .id-row:last-of-type{border-bottom:none;}
+  .id-row .k{color:var(--text-low); font-family:var(--font-mono); font-size:.72rem;}
+  .id-row .v{color:var(--text-hi); font-weight:600;}
+  .status-pill{display:inline-flex; align-items:center; gap:6px; margin-top:16px; background:rgba(147,165,101,0.12); color:var(--olive-soft);
+    font-family:var(--font-mono); font-size:.7rem; padding:6px 12px; border-radius:20px; border:1px solid rgba(147,165,101,0.3);}
+  .status-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--olive-soft);}
+
+  /* ===== Application form ===== */
+  .apply-wrap{display:grid; grid-template-columns:1fr; max-width:640px; margin:0 auto;}
+  .form-panel{background:var(--bg-1); border:1px solid var(--line); border-radius:8px; padding:34px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-family:var(--font-mono); font-size:.72rem; color:var(--olive-soft); letter-spacing:.5px; margin-bottom:8px;}
+  .field input, .field textarea{
+    width:100%; background:var(--bg-0); border:1px solid var(--line); border-radius:4px; padding:12px 14px;
+    color:var(--text-hi); font-family:var(--font-body); font-size:.9rem; outline:none; transition:.15s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--olive);}
+  .field textarea{resize:vertical; min-height:80px;}
+  .field-hint{font-size:.72rem; color:var(--text-low); margin-top:8px; line-height:1.6;}
+  .field-hint b{color:var(--olive-soft); font-weight:600;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
+  .submit-btn{
+    width:100%; background:var(--blaze); color:var(--bg-0); font-weight:700; font-family:var(--font-body);
+    padding:14px; border:none; border-radius:4px; font-size:.94rem; cursor:pointer; transition:.15s; margin-top:6px;
+  }
+  .submit-btn:hover{background:var(--blaze-soft);}
+  .submit-btn:disabled{opacity:.6; cursor:not-allowed;}
+  .form-note{font-size:.76rem; color:var(--text-low); margin-top:14px; text-align:center;}
+  .form-status{margin-top:14px; font-size:.85rem; padding:10px 14px; border-radius:4px; display:none;}
+  .form-status.ok{display:block; background:rgba(147,165,101,0.12); color:var(--olive-soft); border:1px solid rgba(147,165,101,0.3);}
+  .form-status.err{display:block; background:rgba(217,122,42,0.1); color:var(--blaze-soft); border:1px solid rgba(217,122,42,0.3);}
+
+  footer{padding:40px 0; text-align:center;}
+  footer p{color:var(--text-low); font-size:.78rem; font-family:var(--font-mono);}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="silhouette" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a5 5 0 100 10 5 5 0 000-10zM4 22c0-4.4 3.6-8 8-8s8 3.6 8 8H4z"/>
+  </symbol>
+</svg>
+
+<header>
+  <div class="container topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" fill="#171c13" stroke="#93a565" stroke-width="1.4"/>
+        <circle cx="20" cy="20" r="12" fill="none" stroke="#d97a2a" stroke-width="1.2"/>
+        <circle cx="20" cy="20" r="4" fill="#b7c78e"/>
+        <path d="M20 2 V8 M20 32 V38 M2 20 H8 M32 20 H38" stroke="#93a565" stroke-width="1.2"/>
+      </svg>
+      <div class="brand-text">
+        <div class="name">أكاديمية الشرطة</div>
+        <div class="tag">POLICE TRAINING ACADEMY</div>
+      </div>
+    </div>
+    <nav class="mainnav">
+      <a href="#home">الرئيسية</a>
+      <a href="#hierarchy">الهرم القيادي</a>
+      <a href="#apply">التقديم</a>
+    </nav>
+    <a href="#apply" class="cta-btn">قدّم الآن</a>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">TRAINING PORTAL — CLASS ENROLLMENT OPEN</span>
+      <h1>من متدرّب إلى <span>ضابط منضبط</span></h1>
+      <p>بوابة أكاديمية الشرطة الرسمية — تعرّف على الهرم القيادي وقدّم طلب انضمامك مباشرة.</p>
+      <div class="hero-actions">
+        <a href="#apply" class="btn-primary">قدّم الآن</a>
+        <a href="#hierarchy" class="btn-ghost">الهرم القيادي</a>
+      </div>
+    </div>
+    <div class="id-card">
+      <div class="id-top">
+        <div>
+          <div class="label">CADET IDENTIFICATION</div>
+          <div class="val">بطاقة المتدرّب</div>
+        </div>
+        <svg class="id-seal" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="26" stroke="#d97a2a" stroke-width="1.4"/>
+          <circle cx="28" cy="28" r="19" stroke="#93a565" stroke-width="1.2" stroke-dasharray="2 3"/>
+          <text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#b7c78e" font-weight="700">PD-A</text>
+        </svg>
+      </div>
+      <div class="id-row"><span class="k">RANK</span><span class="v">Cadet</span></div>
+      <div class="id-row"><span class="k">PROGRAM</span><span class="v">دفعة التدريب الأساسي</span></div>
+      <div class="id-row"><span class="k">DURATION</span><span class="v">6 أسابيع</span></div>
+      <div class="id-row"><span class="k">STATUS</span><span class="v">قيد التقييم</span></div>
+      <span class="status-pill"><span class="dot"></span> التسجيل متاح للدفعة القادمة</span>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="hierarchy">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">CHAIN OF COMMAND</span>
+      <h2>الهرم القيادي للأكاديمية</h2>
+      <p>التسلسل الإداري المسؤول عن إدارة الأكاديمية والإشراف على برنامج التدريب.</p>
+    </div>
+
+    <div class="tree">
+      <div class="tier-row">
+        <div class="person-card top">
+          <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+          <div class="p-name empty">Kyubi</div>
+          <div class="p-rank">POLICE ACADEMY COMMANDER</div>
+        </div>
+        <div class="person-card top">
+          <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+          <div class="p-name empty">Kyubi</div>
+          <div class="p-rank">POLICE ACADEMY DEPUTY</div>
+        </div>
+      </div>
+
+      <div class="tier-row">
+        <div class="person-card">
+          <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+          <div class="p-name empty">Kyubi</div>
+          <div class="p-rank">POLICE ACADEMY SUPERVISOR</div>
+        </div>
+        <div class="person-card">
+          <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+          <div class="p-name empty">Kyubi</div>
+          <div class="p-rank">POLICE ACADEMY MANAGEMENT</div>
+        </div>
+      </div>
+
+      <div class="branch-row">
+          <div class="person-card small">
+            <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+            <div class="p-name empty">Kyubi</div>
+            <div class="p-rank">SECTION LEADER</div>
+          </div>
+          <div class="person-card small">
+            <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+            <div class="p-name empty">Kyubi</div>
+            <div class="p-rank">SECTION LEADER</div>
+          </div>
+          <div class="person-card small">
+            <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+            <div class="p-name empty">Kyubi</div>
+            <div class="p-rank">SECTION LEADER</div>
+          </div>
+          <div class="person-card small">
+            <div class="person-photo"><svg>https://r2.fivemanage.com/yPWZEg3TyMvOAmdNBBqcb/image.png<use href="#silhouette"/></svg></div>
+            <div class="p-name empty">Kyubi</div>
+            <div class="p-rank">SECTION LEADER</div>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+<section class="block" id="apply" style="border-bottom:none;">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">CADET APPLICATION</span>
+      <h2>نموذج التقديم</h2>
+      <p>عبّي بياناتك بالأسفل، وبيوصل طلبك مباشرة لفريق القبول عبر ديسكورد.</p>
+    </div>
+    <div class="apply-wrap">
+      <div class="form-panel">
+        <form id="applyForm">
+          <div class="field-row">
+            <div class="field">
+              <label>الاسم الكامل</label>
+              <input type="text" id="f-name" required placeholder="مثال: عبدالله الحربي">
+            </div>
+            <div class="field">
+              <label>آيدي الديسكورد (Discord ID)</label>
+              <input type="text" id="f-discord" required pattern="\d{15,22}" title="آيدي الديسكورد يتكون من أرقام فقط" placeholder="703365110655221851">
+              <p class="field-hint">
+                فعّل <b>وضع المطوّر</b> من إعدادات ديسكورد (Settings → Advanced → Developer Mode)،
+                بعدها كليك يمين على اسمك واختر <b>Copy User ID</b>، وألصقه هنا.
+              </p>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>العمر</label>
+              <input type="number" id="f-age" required min="1" max="99" placeholder="18">
+            </div>
+            <div class="field">
+              <label>ساعات التواجد المتوقعة أسبوعيًا</label>
+              <input type="text" id="f-hours" required placeholder="مثال: 10 ساعات">
+            </div>
+          </div>
+          <div class="field">
+            <label>ما هي الأدلة الصحيحة والغير صحيحة؟</label>
+            <textarea id="f-evidence" required placeholder="اذكر رأيك بالأدلة المقبولة وغير المقبولة..."></textarea>
+          </div>
+          <div class="field">
+            <label>حسب معرفتك، اذكر أهم ثلاث بروتوكولات عسكرية</label>
+            <textarea id="f-protocols" required placeholder="1) ... 2) ... 3) ..."></textarea>
+          </div>
+          <div class="field">
+            <label>لماذا تريد الانضمام للأكاديمية؟</label>
+            <textarea id="f-why" required placeholder="اكتب سبب رغبتك بالانضمام..."></textarea>
+          </div>
+          <div class="field">
+            <label>هل لديك خبرة سابقة بأي قسم شرطة أو رول بلاي؟</label>
+            <textarea id="f-exp" placeholder="اختياري..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">إرسال الطلب</button>
+          <div class="form-status" id="formStatus"></div>
+          <p class="form-note">بإرسالك هذا النموذج فإنك تقرّ بالالتزام بجميع قوانين وشروط الأكاديمية.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© أكاديمية الشرطة — بوابة التدريب الرسمية · قالب جاهز للتخصيص باسم أكاديميتك</p>
+  </div>
+</footer>
+
+<script>
+/* ===== إعداد رابط الويب هوك =====
+   1) روح لروم الديسكورد اللي تبي الطلبات توصله
+   2) إعدادات الروم (Edit Channel) → Integrations → Webhooks → New Webhook
+   3) انسخ الرابط (Copy Webhook URL) وحطه مكان الرابط بالأسفل
+*/
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1526728729500582058/ROOnjbm4GFCzaC41FSGncEtGkd1n3A-skNO7zIOm8PqXWndfdNg4licrJSUtcF8yUGTI";
+
+const STORAGE_KEY = "academy_application_submitted";
+const form = document.getElementById('applyForm');
+const btn = document.getElementById('submitBtn');
+const status = document.getElementById('formStatus');
+
+/* لو سبق وقدّم من نفس المتصفح، نعطّل النموذج من البداية */
+function checkAlreadyApplied(){
+  if(localStorage.getItem(STORAGE_KEY)){
+    status.className = 'form-status err';
+    status.textContent = 'لقد قدّمت طلبًا مسبقًا من هذا الجهاز. إذا تبي تقديم من جديد تواصل مع الإدارة.';
+    btn.disabled = true;
+    btn.textContent = 'تم إرسال طلب مسبقًا';
+    return true;
+  }
+  return false;
+}
+checkAlreadyApplied();
+
+form.addEventListener('submit', async function(e){
+  e.preventDefault();
+  status.className = 'form-status';
+
+  if(checkAlreadyApplied()) return;
+
+  if(WEBHOOK_URL.includes('ضع_رابط')){
+    status.textContent = 'لم يتم إعداد رابط ديسكورد بعد — تواصل مع مسؤول الموقع.';
+    status.classList.add('err');
+    return;
   }
 
-  const apps = loadApps();
-  const record = apps[discordId];
+  const discordId = document.getElementById('f-discord').value.trim();
+  if(!/^\d{15,22}$/.test(discordId)){
+    status.textContent = 'آيدي الديسكورد غير صحيح — تأكد إنه أرقام فقط (انسخه بوضع المطوّر).';
+    status.classList.add('err');
+    return;
+  }
 
-  if (action === 'delete') {
-    delete apps[discordId];
-    saveApps(apps);
-    if (record) {
-      const embed = buildEmbed(record, '🗑️ تم حذف الطلب — يمكنه التقديم مجددًا', 0x6f8598);
-      await interaction.update({ embeds: [embed], components: [] });
+  const name = document.getElementById('f-name').value.trim();
+  const age = document.getElementById('f-age').value.trim();
+  const hours = document.getElementById('f-hours').value.trim();
+  const evidence = document.getElementById('f-evidence').value.trim();
+  const protocols = document.getElementById('f-protocols').value.trim();
+  const why = document.getElementById('f-why').value.trim();
+  const exp = document.getElementById('f-exp').value.trim() || 'لا يوجد';
+
+  btn.disabled = true;
+  btn.textContent = 'جارٍ الإرسال...';
+
+  const now = new Date();
+  const appliedAt = now.toLocaleString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  const payload = {
+    content: `<@${discordId}>`,
+    embeds: [{
+      title: "🛡️ طلب انضمام جديد / New Cadet Application",
+      color: 14183466,
+      fields: [
+        { name: "👤 Discord", value: `<@${discordId}>`, inline: true },
+        { name: "🆔 Discord ID", value: discordId, inline: true },
+        { name: "📅 Applied At", value: appliedAt, inline: false },
+        { name: "👤 الاسم الكامل", value: name, inline: true },
+        { name: "🎂 العمر", value: age, inline: true },
+        { name: "⏰ ساعات التواجد", value: hours, inline: true },
+        { name: "📄 الأدلة الصحيحة والغير صحيحة", value: evidence },
+        { name: "🎖️ أهم ثلاث بروتوكولات عسكرية", value: protocols },
+        { name: "💬 سبب الانضمام", value: why },
+        { name: "💼 الخبرة السابقة", value: exp },
+        { name: "📊 Status", value: "⏳ Pending Review" }
+      ],
+      footer: { text: "Academy Application System" },
+      timestamp: now.toISOString()
+    }],
+    allowed_mentions: { parse: [] }
+  };
+
+  try{
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(res.ok){
+      localStorage.setItem(STORAGE_KEY, "1");
+      status.textContent = '✓ تم إرسال طلبك بنجاح، سيتم التواصل معك قريبًا عبر ديسكورد.';
+      status.classList.add('ok');
+      form.reset();
+      btn.textContent = 'تم إرسال طلب مسبقًا';
+      btn.disabled = true;
     } else {
-      await interaction.update({ components: [] });
+      throw new Error('Webhook error');
     }
-    return;
-  }
-
-  if (!record) {
-    return interaction.reply({ content: 'هذا الطلب لم يعد موجودًا (ربما انحذف مسبقًا).', ephemeral: true });
-  }
-
-  if (action === 'accept') {
-    record.status = 'accepted';
-    apps[discordId] = record;
-    saveApps(apps);
-
-    try {
-      const user = await client.users.fetch(discordId);
-      await user.send(
-        `🎉 مبروك! تم قبول طلبك للانضمام لأكاديمية الشرطة.\n\n` +
-        `رابط سيرفر الديسكورد: ${process.env.GUILD_INVITE_LINK}\n\n` +
-        `بانتظارك للانضمام لأول حصة تدريبية.`,
-      );
-    } catch (e) {
-      console.log(`⚠️ تعذّر إرسال DM للمستخدم ${discordId} (الخاص مقفول عنده).`);
-    }
-
-    const embed = buildEmbed(record, '✅ Accepted', 0x93a565);
-    await interaction.update({ embeds: [embed], components: [deleteOnlyRow(discordId)] });
-    return;
-  }
-
-  if (action === 'reject') {
-    record.status = 'rejected';
-    apps[discordId] = record;
-    saveApps(apps);
-
-    const embed = buildEmbed(record, '❌ Rejected', 0xb3312c);
-    await interaction.update({ embeds: [embed], components: [deleteOnlyRow(discordId)] });
-    return;
+  } catch(err){
+    status.textContent = 'حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.';
+    status.classList.add('err');
+    btn.disabled = false;
+    btn.textContent = 'إرسال الطلب';
   }
 });
-
-client.login(process.env.BOT_TOKEN);
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`🚀 API listening on port ${process.env.PORT || 3000}`);
-});
+</script>
+</body>
+</html>
