@@ -242,6 +242,9 @@
       <a href="#formation">الاصطفاف</a>
       <a href="#admission">القبول</a>
       <a href="#curriculum">المنهج</a>
+      <a href="#schedule">الجدول</a>
+      <a href="#exams">الاختبارات</a>
+      <a href="#staff">الكادر التدريبي</a>
       <a href="#apply">التقديم</a>
     </nav>
     <a href="#apply" class="cta-btn">قدّم الآن</a>
@@ -252,7 +255,7 @@
   <div class="container hero-grid">
     <div>
       <span class="eyebrow">TRAINING PORTAL — CLASS ENROLLMENT OPEN</span>
-      <h1>Police<span>Academy</span></h1>
+      <h1>من متدرّب إلى <span>ضابط منضبط</span></h1>
       <p>بوابة أكاديمية الشرطة الرسمية — منهج التدريب، شروط القبول، الجدول الأسبوعي، ومسار التقييم الكامل لكل مرحلة من رحلتك التدريبية.</p>
       <div class="hero-actions">
         <a href="#apply" class="btn-primary">قدّم الآن</a>
@@ -273,7 +276,7 @@
       </div>
       <div class="id-row"><span class="k">RANK</span><span class="v">Cadet</span></div>
       <div class="id-row"><span class="k">PROGRAM</span><span class="v">دفعة التدريب الأساسي</span></div>
-      <div class="id-row"><span class="k">DURATION</span><span class="v">اسبوع</span></div>
+      <div class="id-row"><span class="k">DURATION</span><span class="v">6 أسابيع</span></div>
       <div class="id-row"><span class="k">STATUS</span><span class="v">قيد التقييم</span></div>
       <span class="status-pill"><span class="dot"></span> التسجيل متاح للدفعة القادمة</span>
     </div>
@@ -338,7 +341,7 @@
       <p>ضوابط أداء التحية العسكرية بين المنتسبين داخل وخارج مركز الشرطة.</p>
     </div>
     <div class="rule-list">
-      <div class="r-item"><span class="r-num">01</span><span class="r-text">تكون إلزامية لرتبة Senior Officer فما فوق، وهي واجبة على العموم.</span></div>
+      <div class="r-item"><span class="r-num">01</span><span class="r-text">تكون إلزامية لرتبة Lieutenants فما فوق، وهي واجبة على العموم.</span></div>
       <div class="r-item"><span class="r-num">02</span><span class="r-text">يجب على الرتبة المؤدَّى لها التحية أن تردّها، أو ترد بوضع الاستراحة.</span></div>
       <div class="r-item"><span class="r-num">03</span><span class="r-text">تؤدّى التحية داخل وخارج مركز الشرطة، وتُستثنى أثناء الحالات الجنائية.</span></div>
       <div class="r-item"><span class="r-num">04</span><span class="r-text">عند وجود مجموعة ومرور رتبة عالية، يتكفل أعلى رتبة بأداء التحية مع قول "العموم ثابت"، ومن ثم تُؤدّى التحية والبقية في وضع الثبات.</span></div>
@@ -366,9 +369,8 @@
       <div class="honor-card">
         <div class="h-title">سعادة</div>
         <ul>
-          <li>Majors</li>
-          <li>Colonels</li>
-          <li>Command Officers</li>
+          <li>Lieutenants (I, II)</li>
+          <li>Captains</li>
         </ul>
       </div>
       <div class="honor-card">
@@ -377,8 +379,6 @@
           <li>Sergeants</li>
           <li>First Sergeants</li>
           <li>Staff Sergeants</li>
-          <li>Captains</li>
-          <li>Lieutenants</li>
         </ul>
       </div>
       <div class="honor-card">
@@ -388,7 +388,7 @@
           <li>Solo Cadets</li>
           <li>Officer (I, II, III)</li>
           <li>Senior Officers</li>
-          <li>Corporal</li>
+          <li>Senior Lead Officers</li>
         </ul>
       </div>
     </div>
@@ -456,6 +456,54 @@
   </div>
 </section>
 
+<section class="block" id="schedule">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">WEEKLY TIMETABLE</span>
+      <h2>الجدول الأسبوعي للتدريب</h2>
+      <p>مواعيد الحصص التدريبية الأسبوعية لدفعة الكادت الحالية.</p>
+    </div>
+    <div class="sched-wrap">
+      <div class="schedule" id="scheduleGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="exams">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">EVALUATION</span>
+      <h2>الاختبارات والتقييمات</h2>
+      <p>محطات التقييم الإلزامية لاجتياز برنامج التدريب والترقّي للميدان.</p>
+    </div>
+    <div class="alert-box"><span class="tag">⚠ ملاحظة</span><span>الرسوب في أي اختبار إلزامي يستوجب إعادة المحاولة بعد فترة تقييم إضافية بموافقة المدرّب المسؤول.</span></div>
+    <div class="exam-grid" id="examGrid"></div>
+  </div>
+</section>
+
+<section class="block" id="ranks">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">PROGRESSION PATH</span>
+      <h2>مسار الرتب من Cadet</h2>
+      <p>الخط الزمني للتقدّم من أول يوم تدريب إلى أول تكليف ميداني رسمي.</p>
+    </div>
+    <div class="track-wrap">
+      <div class="track-line" id="trackLine"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="staff">
+  <div class="container">
+    <div class="block-head">
+      <span class="kicker">TRAINING STAFF</span>
+      <h2>الكادر التدريبي</h2>
+      <p>المدرّبون المسؤولون عن الإشراف والتقييم خلال برنامج التدريب.</p>
+    </div>
+    <div class="staff-grid" id="staffGrid"></div>
+  </div>
+</section>
 
 <section class="block" id="apply" style="border-bottom:none;">
   <div class="container">
@@ -470,7 +518,7 @@
           <div class="field-row">
             <div class="field">
               <label>الاسم الكامل</label>
-              <input type="text" id="f-name" required placeholder="مثال:عبد الرحمن المطيري">
+              <input type="text" id="f-name" required placeholder="مثال: عبدالله الحربي">
             </div>
             <div class="field">
               <label>آيدي الديسكورد (Discord ID)</label>
@@ -493,19 +541,11 @@
             </div>
           </div>
           <div class="field">
-            <label>حسب معرفتك اذكر اهم ثلاث بروتكلات عسكرية؟</label>
-            <textarea id="f-why1" placeholder="حسب معرفتك..."></textarea>
-          </div>
-          <div class="field">
-            <label>ماهي الادلة الصحيحة والغير صحيحة؟</label>
-            <textarea id="f-why2" placeholder="ماهي الادلة..."></textarea>
-          </div>
-          <div class="field">
-            <label>لماذا تريد الانضمام للشرطة؟</label>
+            <label>لماذا تريد الانضمام للأكاديمية؟</label>
             <textarea id="f-why" required placeholder="اكتب سبب رغبتك بالانضمام..."></textarea>
           </div>
           <div class="field">
-            <label>هل لديك خبرة سابقة في شرطة؟</label>
+            <label>هل لديك خبرة سابقة بأي قسم شرطة أو رول بلاي؟</label>
             <textarea id="f-exp" placeholder="اختياري..."></textarea>
           </div>
           <button type="submit" class="submit-btn" id="submitBtn">إرسال الطلب</button>
@@ -542,6 +582,13 @@ const curriculum = [
   {wk:"6", h:"التقييم النهائي والتخرج", d:"اختبار شامل نظري وعملي أمام لجنة من الأكاديمية لتحديد الجاهزية الميدانية.", tags:["تقييم نهائي"]},
 ];
 
+const days = ["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+const scheduleRows = [
+  {time:"18:00", slots:[1,0,1,0,1,0]},
+  {time:"19:00", slots:[1,1,0,1,0,1]},
+  {time:"20:00", slots:[0,1,1,0,1,0]},
+  {time:"21:00", slots:[0,0,1,1,0,1]},
+];
 
 const exams = [
   {t:"اختبار القوانين العامة", d:"اختبار نظري قصير حول القواعد العامة وأخلاقيات الخدمة.", pct:100, pass:"نسبة النجاح 80%"},
@@ -550,11 +597,19 @@ const exams = [
   {t:"الاختبار الميداني النهائي", d:"مرافقة دورية فعلية وتقييم الأداء العام قبل التخرج.", pct:60, pass:"موافقة لجنة التخرج"},
 ];
 
+const track = [
+  {r:"Cadet", req:"أول يوم تدريب"},
+  {r:"Solo Cadet", req:"اجتياز الأسبوعين الأولين"},
+  {r:"Field Trainee", req:"اجتياز التقييم الميداني الأول"},
+  {r:"Graduate", req:"اجتياز الاختبار النهائي"},
+  {r:"Officer I", req:"أول تكليف رسمي بالقسم"},
+];
+
 const staff = [
-  {n:"Kyubi.", role:"رئيس الأكاديمية", spec:"الإشراف العام على البرنامج التدريبي"},
-  {n:"Kyubi.", role:"مدرّبة ميدانية", spec:"الاستيقافات والتعامل مع المخالفات"},
-  {n:"Kyubi.", role:"مدرّب راديو وديسباتش", spec:"بروتوكولات التخاطب اللاسلكي"},
-  {n:"Kyubi.", role:"مقيّمة اختبارات", spec:"إدارة التقييم النظري والعملي"},
+  {n:"Ahmed R.", role:"رئيس الأكاديمية", spec:"الإشراف العام على البرنامج التدريبي"},
+  {n:"Sara K.", role:"مدرّبة ميدانية", spec:"الاستيقافات والتعامل مع المخالفات"},
+  {n:"Omar F.", role:"مدرّب راديو وديسباتش", spec:"بروتوكولات التخاطب اللاسلكي"},
+  {n:"Lina M.", role:"مقيّمة اختبارات", spec:"إدارة التقييم النظري والعملي"},
 ];
 
 document.getElementById('reqGrid').innerHTML = reqs.map(r=>`
@@ -626,8 +681,6 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
   const discordId = document.getElementById('f-discord').value.trim();
   const age = document.getElementById('f-age').value.trim();
   const hours = document.getElementById('f-hours').value.trim();
-  const why1 = document.getElementById('f-why1').value.trim();
-  const why2 = document.getElementById('f-why2').value.trim();
   const why = document.getElementById('f-why').value.trim();
   const exp = document.getElementById('f-exp').value.trim() || 'لا يوجد';
 
@@ -646,7 +699,7 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
   const payload = {
     content: `<@${discordId}>`,
     embeds: [{
-      title: "Police Academy",
+      title: "🛡️ طلب انضمام جديد / New Cadet Application",
       color: 14183466,
       fields: [
         { name: "👤 Discord", value: `<@${discordId}>`, inline: true },
@@ -655,10 +708,8 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
         { name: "👤 الاسم الكامل", value: name, inline: true },
         { name: "🎂 العمر", value: age, inline: true },
         { name: "⏰ ساعات التواجد", value: hours, inline: true },
-        { name: "💬 حسب معرفتك اذكر اهم ثلاث بروتكلات عسكرية؟", value: why1 },
-        { name: "💬 ماهي الادلة الصحيحةوالغير صحيحة؟", value: why2 },
-        { name: "💬 لماذا تريد الانضمام للشرطة؟", value: why },
-        { name: "💼 هل لديك خبرة سابقة في شرطة؟", value: exp },
+        { name: "💼 الخبرة السابقة", value: exp },
+        { name: "💬 سبب الانضمام", value: why },
         { name: "📊 Status", value: "⏳ Pending Review" }
       ],
       footer: { text: "Academy Application System" },
