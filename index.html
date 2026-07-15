@@ -541,11 +541,19 @@
             </div>
           </div>
           <div class="field">
-            <label>لماذا تريد الانضمام للأكاديمية؟</label>
+            <label>حسب معرفتك اذكر اهم ثلاث بروتكلات عسكرية؟</label>
+            <textarea id="f-exp" placeholder="حسب معرفتك..."></textarea>
+          </div>
+          <div class="field">
+            <label>ماهي الادلة الصحيحةوالغير صحيحة؟</label>
+            <textarea id="f-exp" placeholder="ماهي الادلة..."></textarea>
+          </div>
+          <div class="field">
+            <label>لماذا تريد الانضمام للشرطة؟</label>
             <textarea id="f-why" required placeholder="اكتب سبب رغبتك بالانضمام..."></textarea>
           </div>
           <div class="field">
-            <label>هل لديك خبرة سابقة بأي قسم شرطة أو رول بلاي؟</label>
+            <label>هل لديك خبرة سابقة في شرطة؟</label>
             <textarea id="f-exp" placeholder="اختياري..."></textarea>
           </div>
           <button type="submit" class="submit-btn" id="submitBtn">إرسال الطلب</button>
@@ -606,10 +614,10 @@ const track = [
 ];
 
 const staff = [
-  {n:"Ahmed R.", role:"رئيس الأكاديمية", spec:"الإشراف العام على البرنامج التدريبي"},
-  {n:"Sara K.", role:"مدرّبة ميدانية", spec:"الاستيقافات والتعامل مع المخالفات"},
-  {n:"Omar F.", role:"مدرّب راديو وديسباتش", spec:"بروتوكولات التخاطب اللاسلكي"},
-  {n:"Lina M.", role:"مقيّمة اختبارات", spec:"إدارة التقييم النظري والعملي"},
+  {n:"Kyubi.", role:"رئيس الأكاديمية", spec:"الإشراف العام على البرنامج التدريبي"},
+  {n:"Kyubi.", role:"مدرّبة ميدانية", spec:"الاستيقافات والتعامل مع المخالفات"},
+  {n:"Kyubi.", role:"مدرّب راديو وديسباتش", spec:"بروتوكولات التخاطب اللاسلكي"},
+  {n:"Kyubi.", role:"مقيّمة اختبارات", spec:"إدارة التقييم النظري والعملي"},
 ];
 
 document.getElementById('reqGrid').innerHTML = reqs.map(r=>`
