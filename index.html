@@ -542,11 +542,11 @@
           </div>
           <div class="field">
             <label>حسب معرفتك اذكر اهم ثلاث بروتكلات عسكرية؟</label>
-            <textarea id="f-exp" placeholder="حسب معرفتك..."></textarea>
+            <textarea id="f-why1" placeholder="حسب معرفتك..."></textarea>
           </div>
           <div class="field">
             <label>ماهي الادلة الصحيحةوالغير صحيحة؟</label>
-            <textarea id="f-exp" placeholder="ماهي الادلة..."></textarea>
+            <textarea id="f-why2" placeholder="ماهي الادلة..."></textarea>
           </div>
           <div class="field">
             <label>لماذا تريد الانضمام للشرطة؟</label>
@@ -689,6 +689,8 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
   const discordId = document.getElementById('f-discord').value.trim();
   const age = document.getElementById('f-age').value.trim();
   const hours = document.getElementById('f-hours').value.trim();
+  const why1 = document.getElementById('f-why1').value.trim();
+  const why2 = document.getElementById('f-why2').value.trim();
   const why = document.getElementById('f-why').value.trim();
   const exp = document.getElementById('f-exp').value.trim() || 'لا يوجد';
 
@@ -707,7 +709,7 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
   const payload = {
     content: `<@${discordId}>`,
     embeds: [{
-      title: "🛡️ طلب انضمام جديد / New Cadet Application",
+      title: "Police Academy",
       color: 14183466,
       fields: [
         { name: "👤 Discord", value: `<@${discordId}>`, inline: true },
@@ -716,8 +718,10 @@ document.getElementById('applyForm').addEventListener('submit', async function(e
         { name: "👤 الاسم الكامل", value: name, inline: true },
         { name: "🎂 العمر", value: age, inline: true },
         { name: "⏰ ساعات التواجد", value: hours, inline: true },
-        { name: "💼 الخبرة السابقة", value: exp },
-        { name: "💬 سبب الانضمام", value: why },
+        { name: "💬 لماذا تريد الانضمام للشرطة؟", value: why },
+        { name: "💬 حسب معرفتك اذكر اهم ثلاث بروتكلات عسكرية؟", value: why1 },
+        { name: "💬 ماهي الادلة الصحيحةوالغير صحيحة؟", value: why2 },
+        { name: "💼 هل لديك خبرة سابقة في شرطة؟", value: exp },
         { name: "📊 Status", value: "⏳ Pending Review" }
       ],
       footer: { text: "Academy Application System" },
